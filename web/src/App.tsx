@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import "./App.scss";
-import { debugData } from "../utils/debugData";
-import PlayerManagement from "./PlayerManagement";
-import AdminOptions from "./AdminOptions";
+import "./index.scss";
+import { debugData } from "./utils/debugData";
+import PlayerManagement from "./components/PlayerManagement";
+import AdminOptions from "./components/AdminOptions";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+
+
 
 // This will set the NUI to visible if we are
 // developing in browser
@@ -15,8 +18,10 @@ debugData([
 
 
 
-const App: React.FC = () => {
-  type Tab = 'admin' | 'server' | 'players';
+
+
+export default function App(){
+  type Tab = 'admin' | 'players';
 
   const [activeTab, setActiveTab] = useState<Tab>('admin')
 
@@ -28,12 +33,6 @@ const App: React.FC = () => {
           onClick={() => setActiveTab('admin')}
         >
           Admin
-        </button>
-        <button
-          className={activeTab === 'server' ? 'tab active' : 'tab'}
-          onClick={() => setActiveTab('server')}
-        >
-          Server
         </button>
         <button
           className={activeTab === 'players' ? 'tab active' : 'tab'}
@@ -50,8 +49,9 @@ const App: React.FC = () => {
           <AdminOptions/>
         )}
       </div>
+      <div className='footer'>
+        <button className='close-menu'><i className='fa-solid fa-xmark'></i></button>
+      </div>
     </div>
   );
 };
-
-export default App;

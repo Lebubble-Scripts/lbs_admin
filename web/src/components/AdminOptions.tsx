@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const AdminOptions: React.FC = () => {
+export default function AdminOptions() {
     return (
         <div className='admin-options'>
             <button>
@@ -17,6 +17,3 @@ const AdminOptions: React.FC = () => {
 
     )
 }
-
-
-export default AdminOptions
