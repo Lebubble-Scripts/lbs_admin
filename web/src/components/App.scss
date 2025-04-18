@@ -1,4 +1,13 @@
-// App.scss
+@font-face {
+  font-family: 'ZxGamut-SemiBold';
+  src: url('/assets/fonts/ZxGamut-SemiBold.woff2') format('woff2'),
+       url('/assets/fonts/ZxGamut-SemiBold.ttf') format('truetype');
+  font-weight: bold;
+}
+
+body {
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+}
 
 // Color variables
 $background: #000000;
@@ -16,43 +25,26 @@ $underline-color: white;
   border-radius: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   display: flex;
   flex-direction: column;
-
-  // Top notch
-  &::before {
-    content: "";
-    display: block;
-    height: 30px;
-    background-color: lighten($background, 5%);
-  }
-
-  // Bottom home indicator
-  &::after {
-    content: "";
-    display: block;
-    height: 20px;
-    background-color: lighten($background, 5%);
-    border-radius: 0 0 20px 20px;
-    width: 100px;
-    margin: 0 auto 16px;
-  }
 
   .tab-row {
     display: flex;
     width: 100%;
     background-color: blueviolet;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   }
 
   .tab {
     flex: 1;
+    font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
     display: flex;
+    font-size: 24px;
     justify-content: center;
     align-items: center;
     padding: 12px 0;
-    font-weight: 600;
-    font-size: 1rem;
     color: white;
     background-color: blueviolet;
     border: none;
@@ -72,8 +64,9 @@ $underline-color: white;
         left: 25%;
         width: 50%;
         height: 3px;
-        background-color: blueviolet;
+        background-color: white;
         border-radius: 2px;
+        transition: all 0.3s ease;
       }
     }
   }
@@ -89,10 +82,45 @@ $underline-color: white;
 // Player Management
 .player-management {
   text-align: center;
-  color: white
+  color: white;
+  font-size: 40px;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
 }
 
 .loading-players {
   text-align: center;
   color: white
 }
+
+
+.admin-options {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.admin-options button {
+  background: blueviolet;
+  border-radius: 999px;
+  box-shadow: blueviolet 0 10px 20px -5px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  opacity: 1;
+  outline: 0 solid transparent;
+  padding: 8px 18px;
+  margin: 15px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+  width: fit-content;
+  word-break: break-word;
+  border: 0;
+}
+

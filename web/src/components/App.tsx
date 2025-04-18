@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import "./App.scss";
 import { debugData } from "../utils/debugData";
 import PlayerManagement from "./PlayerManagement";
-//import { fetchNui } from "../utils/fetchNui";
-//import PlayerManagement from "./PlayerManagement";
+import AdminOptions from "./AdminOptions";
 
 // This will set the NUI to visible if we are
 // developing in browser
@@ -46,6 +45,9 @@ const App: React.FC = () => {
       <div className='tab-content'>
         {activeTab === 'players' && (
           <PlayerManagement />
+        )}
+        {activeTab === 'admin' && (
+          <AdminOptions/>
         )}
       </div>
     </div>
