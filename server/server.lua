@@ -71,6 +71,51 @@ end)
 --Events
 ------------------------------
 
+---@param action string: specific actin taken on player modal
+---@param target number: target player action should be executed on
+---@param reason?  string: for bans/kicks - reason player was banned/kicked
+---@param duration? string: for bans/kicks - duration of ban/kick
+---@param durationUnit? string: for bans/kick - allows us to convert whatever choice of unit they chose into seconds for the DropPlayer() native. 
+RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reason, duration, durationUnit)
+    if not target then return end 
+
+    if action == 'ban' then
+        local admin = GetPlayerName(source)
+        local player = GetPlayerName(target)
+        --log to discord
+        if TriggerEvent('lbs_admin:server:check_permissions', source) then
+            print('time before manipulation')
+            print(duration)
+            print(durationUnit)
+            if durationUnit == 's' then
+                duration = tonumber(duration)
+            elseif durationUnit == 'm' then
+                duration = tonumber(duration) * 60
+            elseif durationUnit == 'h' then
+                duration = tonumber(duration) * 60 * 60
+            elseif durationUnit == 'd' then 
+                duration = tonumber(duration) * 24 * 60 * 60
+            elseif durationUnit == 'M' then
+                -- Months: approximated by multiplying 30 days.
+                duration = tonumber(duration) * 30 * 24 * 60 * 60
+            elseif durationUnit == 'y' then
+                duration = tonumber(duration) * 365 * 24 * 60 * 60
+            elseif durationUnit == 'p' then
+                duration = 2147483647
+            end
+            print('time after manipulation')
+            print(duration)
+            local banTime = tonumber(os.time() + duration)
+            if banTime > 2147483647 then
+                banTime = 2147483647
+            end
+            local timeTable = os.date('*t', banTime)
+            print(reason .. '\n' .. timeTable['month'] .. '/' .. timeTable['day'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] .. '\nCheck our Discord for more information.')
+        end
+    end
+end)
+
+
 RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local src = source
     if Config.Framework == 'qb' or Config.Framework == 'qbx' then

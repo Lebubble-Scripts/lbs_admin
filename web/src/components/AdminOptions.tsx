@@ -15,10 +15,6 @@ type Vec4 = {
     w: number;
 }
 
-type Heading = {
-    heading: number;
-}
-
 
 export default function AdminOptions() {
 

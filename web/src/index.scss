@@ -11,6 +11,27 @@ body {
   font-size: 18px;
 }
 
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes modalSlideFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // Color variables
 $primary_color: blueviolet;
 $background_color: rgba(0, 0, 0, 0.25);
@@ -149,10 +170,12 @@ button {
   color: $text_color;
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   overflow: auto;
+  transition: 0.3s;
 
   .player-grid {
     border: 2px solid $primary_color;
     border-radius: 10px;
+
   }
 
   .player-card {
@@ -163,6 +186,8 @@ button {
     padding: 10px;
     border: 1px solid $primary_color;
     border-radius: 10px;
+    box-shadow: $hover_color 0 5px 10px -2px;
+    margin-bottom: 2vh;
 
     h3 {
       background-color: $primary_color;
@@ -185,6 +210,7 @@ button {
   align-items: center;
   height: 100%;
   color: $text_color;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   
   h3 {
     font-size: 24px;
@@ -202,6 +228,7 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   z-index: 1000;
 }
 
@@ -209,20 +236,88 @@ button {
   background-color: rgba(0, 0, 0, 0.95);
   border: 2px solid $primary_color;
   border-radius: 20px;
+  overflow-y: scroll;
   width: 90%;
   max-width: 500px;
   padding: 20px;
   color: $text_color;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  animation: modalFadeIn 0.3s ease-out forwards;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+  transition: 0.3s;
+  .close-modal{
+    font-size: 20px;
+    width: 10vh;
+    margin-top: 5.5vh;
+  }
 
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.8) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
+  
+  
+
+  .sub-modal-content {
+    color: $text_color;
+    font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+    animation: modalSlideFromTop .3s ease-out forwards;
+    transition: 0.3s;
+
+    .form-group {
+      //background-color: $primary_color;
+      display: block;
+      padding: 5px;
+      
+      textarea {
+        background-color: $primary_color;
+        color: $text_color;
+        font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+
+        &:after{
+          outline:none
+        }
+        &:focus{
+          outline: none;
+        }
+      }
+      
+
+      ::placeholder {
+        color: color.adjust($primary_color, $lightness: 25%);
+      }
+
+      label {
+        font-size: 14px;
+      }
+      input, select {
+        padding: 5px;
+        border-radius: 10px;
+        margin: 5px;
+        background-color: $primary_color;
+        color: $text_color;
+        box-shadow: $hover_color 0 5px 10px -1px;
+        font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+        border: none;
+        
+        &:focus {
+          outline: none;
+          background-color: $primary_color; // maintain consistent styling on focus
+        }
+        &[type=text] {
+          width: 20vh;
+          height: 10vh;
+          vertical-align: top;
+          white-space: pre-wrap;  // preserves whitespace and wraps text
+          overflow-wrap: break-word;
+          //box-shadow: ;
+        }
+        
+        // Style the arrow controls on WebKit browsers
+        &[type=number]::-webkit-inner-spin-button,
+        &[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+          background-color: $primary_color;
+          color: $text_color;
+        }
+      }
     }
   }
   

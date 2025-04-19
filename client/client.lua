@@ -3,6 +3,7 @@ local function toggleNuiFrame(shouldShow)
   SendReactMessage('setVisible', shouldShow)
 end
 
+-- Commands
 RegisterCommand('adminmenu', function()
   lib.callback('lbs_admin:server:check_permissions', false, function(isAdmin)
     if isAdmin then
@@ -23,7 +24,7 @@ end, true)
 
 
 
-
+-- Callbacks
 RegisterNUICallback('hideFrame', function(_, cb)
   toggleNuiFrame(false)
   debugPrint('Hide NUI frame')
@@ -106,5 +107,18 @@ end)
 
 RegisterNUICallback('teleport_to_marker', function(_,cb)
   TriggerServerEvent('lbs_admin:server:teleport_marker')
+  cb({})
+end)
+
+-- Player Management Buttons
+---@param action action associated with pressed button
+---@param target id of target player action has been requested for
+RegisterNUICallback('player_action', function(data, cb)
+  local action = data.action 
+  local target = data.target
+  local reason = data.reason
+  local duration = data.duration
+  local durationUnit = data.durationUnit
+  TriggerServerEvent('lbs_admin:server:player_action', action, target, reason, duration, durationUnit)
   cb({})
 end)
