@@ -47,14 +47,6 @@ export default function PlayerManagement() {
         duration?: string,
         durationUnit?: string
     ) => {
-        console.log('Browser action performed:', {
-            action,
-            id,
-            reason,
-            duration,
-            durationUnit
-        });
-
         const payload = {
             action: action,
             target: id,

@@ -64,6 +64,10 @@ export default function PlayerActionModal({
                     <button onClick={() => handleAction('teleport')} className="action-button teleport">
                         <i className="fa-solid fa-location-arrow"></i> Teleport
                     </button>
+
+                    <button onClick={() => handleAction('bring')} className="action-button bring">
+                        <i className="fa-solid fa-arrow-down"></i> Bring
+                    </button>
                     
                     <button onClick={() => handleAction('spectate')} className="action-button spectate">
                         <i className="fa-solid fa-eye"></i> Spectate

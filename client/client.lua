@@ -22,9 +22,16 @@ RegisterCommand('adminmenu', function()
   
 end, true)
 
+-- EVENTS
+
+RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
+  local ped = PlayerPedId()
+
+  SetEntityCoords(ped, coords.x, coords.y, coords.z + 1.0)
+end)
 
 
--- Callbacks
+-- CALLBACKS
 RegisterNUICallback('hideFrame', function(_, cb)
   toggleNuiFrame(false)
   debugPrint('Hide NUI frame')

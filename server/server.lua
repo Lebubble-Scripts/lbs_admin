@@ -78,7 +78,7 @@ end)
 ---@param durationUnit? string: for bans/kick - allows us to convert whatever choice of unit they chose into seconds for the DropPlayer() native. 
 RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reason, duration, durationUnit)
     if not target then return end 
-
+    -- BAN ACTION
     if action == 'ban' then
         local admin = GetPlayerName(source)
         local player = GetPlayerName(target)
@@ -112,7 +112,20 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             local timeTable = os.date('*t', banTime)
             print(reason .. '\n' .. timeTable['month'] .. '/' .. timeTable['day'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] .. '\nCheck our Discord for more information.')
         end
+    elseif action == 'teleport' then
+        local src = source 
+        local coords = GetEntityCoords(GetPlayerPed(target))
+        local admin = GetPlayerName(source)
+        local player = GetPlayerName(target)
+        --log to discord here
+        TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
+    elseif action == 'bring' then
+        local src = source
+        local coords = GetEntityCoords(GetPlayerPedId(src))
+        --log to discord here
+        TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
     end
+
 end)
 
 
