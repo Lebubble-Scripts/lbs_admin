@@ -1,11 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-    // Other Mantine components can be imported if needed
-    Button,
-    Loader,
-    Space
-} from '@mantine/core';
-import { debugData } from '../utils/debugData';
 import { fetchNui } from '../utils/fetchNui';
 import PlayerActionModal from '../components/PlayerActionModal';
 
@@ -15,25 +8,27 @@ interface Player {
     name: string;
 }
 
-// // Mock data for testing in browser
-// const mockPlayers: Player[] = [
-//     { id: 1, name: 'Player One' },
-//     { id: 2, name: 'Player Two' },
-//     { id: 3, name: 'Player Three' },
-//     { id: 4, name: 'Player Four' },
-//     { id: 5, name: 'Player Five' },
-//     { id: 6, name: 'Player Six' },
-//     { id: 7, name: 'Player Seven' },
-//     { id: 8, name: 'Player Eight' },
-//     { id: 9, name: 'Player Nine' },
-//     { id: 10, name: 'Player Ten' }
-//     // ... add more if needed
-// ];
+// Mock data for testing in browser
+const mockPlayers: Player[] = [
+    { id: 1, name: 'Player One' },
+    { id: 2, name: 'Player Two' },
+    { id: 3, name: 'Player Three' },
+    { id: 4, name: 'Player Four' },
+    { id: 5, name: 'Player Five' },
+    { id: 6, name: 'Player Six' },
+    { id: 7, name: 'Player Seven' },
+    { id: 8, name: 'Player Eight' },
+    { id: 9, name: 'Player Nine' },
+    { id: 10, name: 'Player Ten' }
+    // ... add more if needed
+];
 
 export default function PlayerManagement() {
+    // FOR BROWSER DEVELOPMENT === CHANGE [] to mockPlayers
     const [players, setPlayers] = useState<Player[]>([]);
 
     useEffect(() => {
+        // FOR BROWSER DEVELOPMENT === COMMENT OUT FETCH CALL BELOW
         fetchNui<Player[]>('getPlayerList')
           .then((data) => {
             setPlayers(data);
@@ -44,7 +39,7 @@ export default function PlayerManagement() {
           });
     }, []);
 
-    // Handle action in browser (simulate server action)
+    // Handle action on server
     const handleServerAction = (
         action: string,
         id: number,
@@ -69,7 +64,6 @@ export default function PlayerManagement() {
         };
 
         fetchNui('player_action', payload)
-        // console.log('Action payload:', payload);
     };
 
     // Modal state for selected player
@@ -88,7 +82,7 @@ export default function PlayerManagement() {
 
     return (
         <div className="player-management">
-            <h2>Player Management (Browser)</h2>
+            <h2>Player Management</h2>
             <div
                 style={{
                     display: 'grid',
