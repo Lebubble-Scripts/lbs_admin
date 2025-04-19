@@ -4,6 +4,7 @@ import { debugData } from "./utils/debugData";
 import PlayerManagement from "./components/PlayerManagement";
 import AdminOptions from "./components/AdminOptions";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { fetchNui } from "./utils/fetchNui";
 
 
 
@@ -24,6 +25,10 @@ export default function App(){
   type Tab = 'admin' | 'players';
 
   const [activeTab, setActiveTab] = useState<Tab>('admin')
+
+  const handleCloseMenu = () => {
+    fetchNui('hideFrame')
+  }
 
   return (
     <div className="nui-wrapper">
@@ -50,7 +55,7 @@ export default function App(){
         )}
       </div>
       <div className='footer'>
-        <button className='close-menu'><i className='fa-solid fa-xmark'></i></button>
+        <button className='close-menu' onClick={handleCloseMenu}><i className='fa-solid fa-xmark'></i></button>
       </div>
     </div>
   );

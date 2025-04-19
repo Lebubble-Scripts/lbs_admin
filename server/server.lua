@@ -18,6 +18,17 @@ else
 end
 
 
+
+------------------------------
+--CALLBACKS
+------------------------------
+lib.callback.register('lbs_admin:server:check_permissions', function(src)
+    local admin_role = Config.AdminGroup
+    local admin_status = IsPlayerAceAllowed(src, admin_role)
+    --should double check if they have command access ~_~
+    return admin_status or IsPlayerAceAllowed(src, 'command')
+end)
+
 lib.callback.register('lbs_admin:server:getPlayerList', function()
     local players = {}
     if Config.Framework == 'qb' then 
@@ -52,4 +63,19 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
 
     return players
 
+end)
+
+
+
+------------------------------
+--Events
+------------------------------
+
+RegisterNetEvent('lbs_admin:server:teleport_marker', function()
+    local src = source
+    if Config.Framework == 'qb' or Config.Framework == 'qbx' then
+        TriggerClientEvent('QBCore:Command:GoToMarker', src)
+        --local admin = GetPlayerName(src)
+        --discord log here
+    end
 end)

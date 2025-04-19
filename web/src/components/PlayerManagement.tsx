@@ -67,8 +67,6 @@ interface Player {
 
 export default function PlayerManagement() {
     const [players, setPlayers] = useState<Player[]>([]);
-
-    //Commented out the actual fetch for now
     useEffect(() => {
         fetchNui<Player[]>('getPlayerList')
             .then((data) => {
@@ -85,7 +83,6 @@ export default function PlayerManagement() {
     // Handle Server Action
     const handleServerAction = (action: string, id: number) => {
         console.log(`Action: ${action}, Player ID: ${id}`);
-        //Commented out actual API call
         fetchNui('playerAction', { action, target: id })
             .catch((e) => {
                 console.error('Error sending action', e)
