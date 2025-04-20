@@ -156,9 +156,17 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
     elseif action == 'spectate' then
         if hasAdminPermissions(source) then
+            if source == target then 
+                TriggerClientEvent('ox_lib:notify', source , {
+                    title = 'Error',
+                    description = 'You cannot spectate yourself',
+                    type='error'
+                })
+                return
+            end
             local targetPed = GetPlayerPed(target)
             local coords = GetEntityCoords(targetPed)
-            TriggerClientEvent('lbs_admin:client:spectate', src, target, coords)
+            TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
         end
     elseif action == 'kick' then
         if hasAdminPermissions(source) then
