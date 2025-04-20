@@ -1,9 +1,21 @@
+--------------------
+-- Variables
+--------------------
+local isSpectating = false
+local lastSpectateCoord = nil
+
+--------------------
+-- Functions
+--------------------
+
 local function toggleNuiFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
   SendReactMessage('setVisible', shouldShow)
 end
 
+--------------------
 -- Commands
+--------------------
 RegisterCommand('adminmenu', function()
   lib.callback('lbs_admin:server:check_permissions', false, function(isAdmin)
     if isAdmin then
@@ -22,12 +34,41 @@ RegisterCommand('adminmenu', function()
   
 end, true)
 
+--------------------
 -- EVENTS
+--------------------
 
 RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
   local ped = PlayerPedId()
 
   SetEntityCoords(ped, coords.x, coords.y, coords.z + 1.0)
+end)
+
+RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
+  TriggerServerEvent('lbs_admin:server:check_permissions', function(idAdmin)
+    if not isAdmin then return end
+    local myPed = PlayerPedId()
+    local targetPlayer = GetPlayerFromServerId(targetPed)
+    local target = GetPlayerPed(targetPlayer)
+    if not isSpectating then
+      isSpectating = true
+      SetEntityVisible(myPed, false)
+      SetEntityCollision(myPed, false, false)
+      SetEntityInvincible(myPed, true)
+      NetworkSetEntityInvisibleToNetwork(myPed, true)
+      lastSpectateCoord = GetEntityCoords(myPed)
+      NetworkSetInSpectatorMode(true, target)
+    else
+      isSpectating = false
+      NetworkSetInSpectatorMode(false, target)
+      NetworkSetEntityInvisibleToNetwork(myPed, false)
+      SetEntityCollision(myPed, true, true)
+      SetEntityCoords(myPed, lastSpectateCoord)
+      SetEntityVisible(myPed, true)
+      SetEntityInvincible(myPed, false)
+      lastSpectateCoord = nil
+    end
+  end)
 end)
 
 -- RegisterNetEvent('lbs_admin:client:freeze_player', function(state)
@@ -54,8 +95,10 @@ end)
 --   end
 -- end)
 
-
+--------------------
 --CALLBACKS
+--------------------
+
 -- RegisterNUICallback('freeze_player', function(data, cb)
 --   TriggerServerEvent('lbs_admin:server:freeze_player', data.target, data.reason)
 --   cb({})

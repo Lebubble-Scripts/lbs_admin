@@ -14,7 +14,6 @@ export default function BanModal({playerId, playerName, onConfirm, onCancel}: Ba
     const [durationUnit, setDurationUnit] = useState('s')
 
     const handleConfirm = () => {
-        console.log('BanModal -- Submitting: ', {playerId, banReason, durationValue, durationUnit})
         onConfirm(playerId, banReason, durationValue, durationUnit)
     };
     return (

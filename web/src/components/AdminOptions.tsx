@@ -19,6 +19,9 @@ type Vec4 = {
 export default function AdminOptions() {
 
     const handleKeyboardCopy = (text: string) => {
+        //keep this as a fallback just incase it doesn't get copied to the clipboard.
+        console.log('Copied to clipboard: ', text)
+        
         const textarea = document.createElement('textarea')
         textarea.value = text;
         textarea.setAttribute('readonly', "")
@@ -29,8 +32,7 @@ export default function AdminOptions() {
         textarea.select()
         document.execCommand('copy')
         document.body.removeChild(textarea)
-
-        console.log('Copied to clipboard: ', text)
+        
     }
 
     const handleGetVec3Coords = () => {

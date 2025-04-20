@@ -1,3 +1,5 @@
+//THIS IS NOT FUNCTIONAL YET. KILL ME
+
 import React, { useState } from "react";
 import { Textarea } from "@mantine/core";
 

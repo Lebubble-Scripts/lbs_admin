@@ -43,7 +43,6 @@ export default function PlayerActionModal({
     }
 
     const handleBanConfirm = (playerId:number, reason: string, duration:string, durationUnit:string) => {
-        console.log('PlayerActionModal - Ban Confirm: ', {action: 'ban', playerId, reason, duration, durationUnit})
         onAction('ban', playerId, reason, duration, durationUnit)
         setShowBanModal(false)
     }

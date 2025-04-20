@@ -134,7 +134,6 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
                 banTime,
                 GetPlayerName(source)
             })
-            print('attempting to drop player: ' .. target .. player)
             DropPlayer(target, reason)
         end
     elseif action == 'teleport' then
@@ -155,6 +154,12 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     
     --     print(string.format('Admin %s froze player %s', admin, player))
     --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
+    elseif action == 'spectate' then
+        if hasAdminPermissions(source) then
+            local targetPed = GetPlayerPed(target)
+            local coords = GetEntityCoords(targetPed)
+            TriggerClientEvent('lbs_admin:client:spectate', src, target, coords)
+        end
     elseif action == 'kick' then
         if hasAdminPermissions(source) then
             local discordLink = Config.DiscordLink

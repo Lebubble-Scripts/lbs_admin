@@ -13,7 +13,6 @@ export default function KickModal({playerId, playerName, onConfirm, onCancel}: K
     const [kickReason, setKickReason] = useState("")
 
     const handleConfirm = () => {
-        console.log('KickModal -- Submitting: ', {playerId, kickReason})
         onConfirm(playerId, kickReason)
     }
 
