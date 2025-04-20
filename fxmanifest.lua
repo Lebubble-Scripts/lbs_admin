@@ -4,7 +4,6 @@ description "Server/Player/Dev Admin Menu"
 author "Lebubble Scripts"
 version '0.2.0'
 
-
 lua54 'yes'
 
 game "gta5"
@@ -16,10 +15,17 @@ shared_script  {
   '@ox_lib/init.lua'
 }
 
-dependency 'ox_lib'
+dependencies {
+  'ox_lib',
+  'oxmysql'
+}
 
 client_script "client/**/*"
-server_script "server/**/*"
+
+server_scripts {
+  '@oxmysql/lib/MySQL.lua',
+  "server/**/*"
+}
 
 files {
 	'web/build/index.html',

@@ -27,6 +27,37 @@ local function hasAdminPermissions(src)
     local admin_status = IsPlayerAceAllowed(src, admin_role)
     return admin_status or IsPlayerAceAllowed(src, 'command')
 end
+local function getBanReason(reason, duration, durationUnit)
+    if durationUnit == 's' then
+        duration = tonumber(duration)
+    elseif durationUnit == 'm' then
+        duration = tonumber(duration) * 60
+    elseif durationUnit == 'h' then
+        duration = tonumber(duration) * 60 * 60
+    elseif durationUnit == 'd' then 
+        duration = tonumber(duration) * 24 * 60 * 60
+    elseif durationUnit == 'M' then
+        duration = tonumber(duration) * 30 * 24 * 60 * 60
+    elseif durationUnit == 'y' then
+        duration = tonumber(duration) * 365 * 24 * 60 * 60
+    elseif durationUnit == 'p' then
+        duration = 2147483647
+    end
+    local banTime = tonumber(os.time() + duration)
+    if banTime > 2147483647 then
+        banTime = 2147483647
+    end
+    local timeTable = os.date('*t', banTime)
+    local discordLink = Config.DiscordLink
+    reason = 'You were banned for: ' .. reason .. '\nYou are banned until: ' .. timeTable['month'] .. '/' .. timeTable['day'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] ..  '\nPlease Reread the Server Rules...' .. '\nCheck our Discord for more information: ' .. discordLink ..
+    '\n\n'
+    return reason, banTime
+end
+
+function getIdentifier(source, idtype)
+    if GetConvarInt('sv_fxdkMode', 0) == 1 then return 'license:fxdk' end
+    return GetPlayerIdentifierByType(source, idtype or 'license')
+end
 
 ------------------------------
 --CALLBACKS
@@ -93,33 +124,18 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         local player = GetPlayerName(target)
         --log to discord
         if hasAdminPermissions(source) then
-            print('time before manipulation')
-            print(duration)
-            print(durationUnit)
-            if durationUnit == 's' then
-                duration = tonumber(duration)
-            elseif durationUnit == 'm' then
-                duration = tonumber(duration) * 60
-            elseif durationUnit == 'h' then
-                duration = tonumber(duration) * 60 * 60
-            elseif durationUnit == 'd' then 
-                duration = tonumber(duration) * 24 * 60 * 60
-            elseif durationUnit == 'M' then
-                -- Months: approximated by multiplying 30 days.
-                duration = tonumber(duration) * 30 * 24 * 60 * 60
-            elseif durationUnit == 'y' then
-                duration = tonumber(duration) * 365 * 24 * 60 * 60
-            elseif durationUnit == 'p' then
-                duration = 2147483647
-            end
-            print('time after manipulation')
-            print(duration)
-            local banTime = tonumber(os.time() + duration)
-            if banTime > 2147483647 then
-                banTime = 2147483647
-            end
-            local timeTable = os.date('*t', banTime)
-            print(reason .. '\n' .. timeTable['month'] .. '/' .. timeTable['day'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] .. '\nCheck our Discord for more information.')
+            reason, banTime = getBanReason(reason, duration, durationUnit)
+            MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?,?,?,?,?,?,?)',{
+                GetPlayerName(target),
+                getIdentifier(target, 'license'),
+                getIdentifier(target, 'discord'),
+                getIdentifier(target, 'ip'),
+                reason,
+                banTime,
+                GetPlayerName(source)
+            })
+            print('attempting to drop player: ' .. target .. player)
+            DropPlayer(target, reason)
         end
     elseif action == 'teleport' then
         local src = source 
