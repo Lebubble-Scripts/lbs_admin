@@ -33,7 +33,7 @@ body {
 }
 
 // Color variables
-$primary_color: blueviolet;
+$primary_color: rgb(0, 98, 255);
 $background_color: rgba(0, 0, 0, 0.25);
 $hover_color: color.adjust($primary_color, $lightness: -10%);
 $text_color: white;

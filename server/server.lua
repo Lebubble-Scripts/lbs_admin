@@ -17,10 +17,40 @@ else
     print('[ERROR] NO FRAMEWORK DETECTED')
 end
 
-
 ------------------------------
 -- FUNCTIONS
 ------------------------------
+function send_to_discord_log(title, description, color)
+    local webhook = Config.DiscordWebhook
+    if (not webhook or webhook == '') and Config.EnableDebugMode then 
+        print("[Discord Log] No webhook URL set!")
+        return 
+    end
+    if Config.EnableDebugMode then 
+        print("[Discord Log] Sending to Discord:", title, description)
+    end 
+
+    local embed = {
+        {
+            title = title, 
+            description = description,
+            color = color or 16753920,
+            footer = {
+                text = 'LBS Admin System'
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }
+    }
+
+    PerformHttpRequest(webhook, function(err, text, headers)
+        print("[Discord Log] Response:", err, text)
+    end, "POST", json.encode({
+        username = 'LBS Admin Logs',
+        embeds = embed
+    }), {['Content-Type'] = "application/json"})
+
+end
+
 
 local function hasAdminPermissions(src)
     local admin_role = Config.AdminGroup
@@ -118,13 +148,14 @@ end)
 ---@param durationUnit? string: for bans/kick - allows us to convert whatever choice of unit they chose into seconds for the DropPlayer() native. 
 RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reason, duration, durationUnit)
     if not target then return end 
+    local admin = GetPlayerName(source)
+    local player = GetPlayerName(target)
     -- BAN ACTION
     if action == 'ban' then
-        local admin = GetPlayerName(source)
-        local player = GetPlayerName(target)
         --log to discord
         if hasAdminPermissions(source) then
             reason, banTime = getBanReason(reason, duration, durationUnit)
+            send_to_discord_log("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,source,player,target,reason), 255)
             MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?,?,?,?,?,?,?)',{
                 GetPlayerName(target),
                 getIdentifier(target, 'license'),
@@ -139,14 +170,12 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     elseif action == 'teleport' then
         local src = source 
         local coords = GetEntityCoords(GetPlayerPed(target))
-        local admin = GetPlayerName(source)
-        local player = GetPlayerName(target)
-        --log to discord here
+        send_to_discord_log("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
     elseif action == 'bring' then
         local src = source
         local coords = GetEntityCoords(GetPlayerPed(src))
-        --log to discord here
+        send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
     -- elseif action == 'warn' then
     --     local admin = GetPlayerName(source)
@@ -164,17 +193,18 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
                 })
                 return
             end
+            send_to_discord_log("Spectate Action", ("%s [%s] spectated %s [%s]"):format(admin,source,player,target), 16766720)
             local targetPed = GetPlayerPed(target)
             local coords = GetEntityCoords(targetPed)
             TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
         end
     elseif action == 'kick' then
         if hasAdminPermissions(source) then
+            send_to_discord_log("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,source,player,target, reason), 16711680)
             local discordLink = Config.DiscordLink
             DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
         end
     end
-
 end)
 
 
@@ -182,8 +212,7 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local src = source
     if Config.Framework == 'qb' or Config.Framework == 'qbx' then
         TriggerClientEvent('QBCore:Command:GoToMarker', src)
-        --local admin = GetPlayerName(src)
-        --discord log here
+        send_to_discord_log("TPM Action", ("%s [%s] teleport to marker"):format(admin,source), 255)
     end
 end)
 

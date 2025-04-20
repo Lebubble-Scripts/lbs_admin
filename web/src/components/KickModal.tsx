@@ -22,9 +22,9 @@ export default function KickModal({playerId, playerName, onConfirm, onCancel}: K
                         <h2>Kick Player: {playerName}</h2>
                         <hr/>
                         <div className='form-group'>
-                            <label>Ban Reason: </label>
+                            <label>Kick Reason: </label>
                             {<Textarea 
-                                placeholder='Enter ban reason...'
+                                placeholder='Enter kick reason...'
                                 value={kickReason}
                                 onChange={(e) => setKickReason(e.target.value)}
                             />}

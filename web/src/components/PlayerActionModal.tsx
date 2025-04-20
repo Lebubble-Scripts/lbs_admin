@@ -32,10 +32,16 @@ export default function PlayerActionModal({
     const handleAction = (action: string) => {
         if (action === 'ban'){
             setShowBanModal(true)
+            setShowWarnModal(false)
+            setShowKickModal(false)
         } else if (action === 'kick'){
             setShowKickModal(true)
+            setShowWarnModal(false)
+            setShowBanModal(false)
         } else if (action === 'warn'){
             setShowWarnModal(true)
+            setShowBanModal(false)
+            setShowKickModal(false)
         } 
         else {
             onAction(action, player.id)
