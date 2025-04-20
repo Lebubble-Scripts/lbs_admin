@@ -7,7 +7,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import { fetchNui } from "./utils/fetchNui";
 
 
-
 // This will set the NUI to visible if we are
 // developing in browser
 debugData([

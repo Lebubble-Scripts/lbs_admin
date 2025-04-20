@@ -18,6 +18,15 @@ else
 end
 
 
+------------------------------
+-- FUNCTIONS
+------------------------------
+
+local function hasAdminPermissions(src)
+    local admin_role = Config.AdminGroup
+    local admin_status = IsPlayerAceAllowed(src, admin_role)
+    return admin_status or IsPlayerAceAllowed(src, 'command')
+end
 
 ------------------------------
 --CALLBACKS
@@ -83,7 +92,7 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         local admin = GetPlayerName(source)
         local player = GetPlayerName(target)
         --log to discord
-        if TriggerEvent('lbs_admin:server:check_permissions', source) then
+        if hasAdminPermissions(source) then
             print('time before manipulation')
             print(duration)
             print(durationUnit)
@@ -124,6 +133,12 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         local coords = GetEntityCoords(GetPlayerPedId(src))
         --log to discord here
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
+    -- elseif action == 'warn' then
+    --     local admin = GetPlayerName(source)
+    --     local player = GetPlayerName(target)
+    
+    --     print(string.format('Admin %s froze player %s', admin, player))
+    --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
     end
 
 end)
@@ -137,3 +152,20 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
         --discord log here
     end
 end)
+
+-- RegisterNetEvent('lbs_admin:server:freeze_player', function(target)
+--     print('server: freeze_player triggered')
+--     local src = source
+--     if not hasAdminPermissions(src) then return end
+
+--     local admin = GetPlayerName(src)
+--     local player = GetPlayerName(target)
+
+--     print(string.format('Admin %s froze player %s', admin, player))
+
+--     TriggerClientEvent('lbs_admin:client:freeze_player', target, true)
+
+--     Citizen.SetTimeout(10000, function()
+--         TriggerClientEvent('lbs_admin:client:freeze_player', target, false)
+--     end)
+-- end)

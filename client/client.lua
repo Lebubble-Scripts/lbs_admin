@@ -30,10 +30,41 @@ RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
   SetEntityCoords(ped, coords.x, coords.y, coords.z + 1.0)
 end)
 
+-- RegisterNetEvent('lbs_admin:client:freeze_player', function(state)
+--   print('client: freeze_player triggered')
+--   local ped = PlayerPedId()
+--   FreezeEntityPosition(ped, state)
 
--- CALLBACKS
+--   if state then
+--     SendReactMessage('showFreezeWarning', {
+--       duration = 10000,
+--       admin = true
+--     })
+
+--     Citizen.CreateThread(function()
+--       while IsEntityPositionFrozen(ped) do
+--         DisableAllControlActions(0)
+--         EnableControlAction(0,1,true)
+--         EnableControlAction(0,2,true)
+--         Citizen.Wait(0)
+--       end
+--     end)
+
+--     SendReactMessage('hideFreezeWarning', {})
+--   end
+-- end)
+
+
+--CALLBACKS
+-- RegisterNUICallback('freeze_player', function(data, cb)
+--   TriggerServerEvent('lbs_admin:server:freeze_player', data.target, data.reason)
+--   cb({})
+-- end)
+
 RegisterNUICallback('hideFrame', function(_, cb)
   toggleNuiFrame(false)
+  SetNuiFocus(false, false)
+  SendReactMessage('setVisible', false)
   debugPrint('Hide NUI frame')
   cb({})
 end)
