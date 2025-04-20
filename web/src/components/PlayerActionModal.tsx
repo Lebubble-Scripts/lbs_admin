@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import BanModal from "./BanModal";
 import WarnModal from "./WarnModal";
+import KickModal from "./KickModal";
 
 
 interface Player {
@@ -35,7 +36,7 @@ export default function PlayerActionModal({
             setShowKickModal(true)
         } else if (action === 'warn'){
             setShowWarnModal(true)
-        }
+        } 
         else {
             onAction(action, player.id)
         }
@@ -52,6 +53,11 @@ export default function PlayerActionModal({
         setShowWarnModal(false)
     }
 
+    const handleKickConfirm= (playerId: number, reason:string) => {
+        onAction('kick', playerId, reason)
+        setShowKickModal(false)
+    }
+
     return (
         <div className='modal-overlay'>
             <div className="modal-content">
@@ -64,7 +70,7 @@ export default function PlayerActionModal({
                 </div>
                 <div className="action-buttons">
                     <button onClick={() => handleAction('kick')} className="action-button kick">
-                        <i className="fa-solid fa-boot"></i> Kick Player
+                        <i className="fa-solid fa-exclamation"></i> Kick Player
                     </button>
                     
                     <button onClick={() => handleAction('ban')} className="action-button ban">
@@ -103,6 +109,16 @@ export default function PlayerActionModal({
                             playerName={player.name}
                             onConfirm={handleWarnConfirm}
                             onCancel={() => setShowWarnModal(false)}
+                        />
+                    )
+                }
+                {
+                    showKickModal && (
+                        <KickModal
+                            playerId={player.id}
+                            playerName={player.name}
+                            onConfirm={handleKickConfirm}
+                            onCancel={()=> setShowKickModal(false)}
                         />
                     )
                 }

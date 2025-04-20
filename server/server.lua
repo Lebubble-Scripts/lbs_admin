@@ -130,7 +130,7 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
     elseif action == 'bring' then
         local src = source
-        local coords = GetEntityCoords(GetPlayerPedId(src))
+        local coords = GetEntityCoords(GetPlayerPed(src))
         --log to discord here
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
     -- elseif action == 'warn' then
@@ -139,6 +139,11 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     
     --     print(string.format('Admin %s froze player %s', admin, player))
     --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
+    elseif action == 'kick' then
+        if hasAdminPermissions(source) then
+            local discordLink = Config.DiscordLink
+            DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
+        end
     end
 
 end)
