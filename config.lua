@@ -1,7 +1,7 @@
 Config = {}
 
 -- Set to True to enable debug mode
-Config.EnableDebugMode = false
+Config.EnableDebugMode = true
 
 -- Server group required to access admin menu 
 Config.AdminGroup = 'admin'

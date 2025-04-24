@@ -4,6 +4,7 @@
 local isSpectating = false
 local lastSpectateCoord = nil
 
+
 --------------------
 -- Functions
 --------------------
@@ -29,14 +30,17 @@ RegisterCommand('adminmenu', function()
       })
     end
   end, true)
+end, false)
 
- 
-  
-end, true)
-
+RegisterKeyMapping('adminmenu', 'Open Admin Menu', 'keyboard', 'F3')
 --------------------
 -- EVENTS
 --------------------
+
+RegisterNetEvent('openmenu', function()
+    toggleNuiFrame(true)
+    debugPrint('Show NUI Frame')
+end)
 
 RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
   local ped = PlayerPedId()

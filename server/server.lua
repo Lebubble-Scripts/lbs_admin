@@ -17,6 +17,7 @@ else
     print('[ERROR] NO FRAMEWORK DETECTED')
 end
 
+
 ------------------------------
 -- FUNCTIONS
 ------------------------------
@@ -57,6 +58,7 @@ local function hasAdminPermissions(src)
     local admin_status = IsPlayerAceAllowed(src, admin_role)
     return admin_status or IsPlayerAceAllowed(src, 'command')
 end
+
 local function getBanReason(reason, duration, durationUnit)
     if durationUnit == 's' then
         duration = tonumber(duration)
