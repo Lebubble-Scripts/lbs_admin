@@ -32,6 +32,16 @@ RegisterCommand('adminmenu', function()
   end, true)
 end, false)
 
+RegisterCommand('reportmenu', function()
+  print('test')
+  SendReactMessage('toggleReportMenu', true)
+end, false)
+
+-------------------
+-- Key Mappings
+-------------------
+RegisterKeyMapping('reportmenu', 'Open Report Menu', 'keyboard', 'F10')
+
 RegisterKeyMapping('adminmenu', 'Open Admin Menu', 'keyboard', 'F3')
 --------------------
 -- EVENTS
