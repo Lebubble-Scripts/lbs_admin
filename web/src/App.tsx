@@ -5,6 +5,7 @@ import PlayerManagement from "./components/PlayerManagement";
 import AdminOptions from "./components/AdminOptions";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { fetchNui } from "./utils/fetchNui";
+import AdminReportMenu from "./components/AdminReportMenu";
 
 
 // This will set the NUI to visible if we are
@@ -21,7 +22,7 @@ debugData([
 
 
 export default function App(){
-  type Tab = 'admin' | 'players';
+  type Tab = 'admin' | 'players' | 'reports';
 
   const [activeTab, setActiveTab] = useState<Tab>('admin')
 
@@ -44,6 +45,12 @@ export default function App(){
         >
           Players
         </button>
+        <button
+          className={activeTab === 'reports' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('reports')}
+        >
+          Reports
+        </button>
       </div>
       <div className='tab-content'>
         {activeTab === 'players' && (
@@ -51,6 +58,9 @@ export default function App(){
         )}
         {activeTab === 'admin' && (
           <AdminOptions/>
+        )}
+        {activeTab === 'reports' && (
+          <AdminReportMenu/>
         )}
       </div>
       <div className='footer'>

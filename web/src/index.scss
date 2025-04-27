@@ -163,18 +163,22 @@ button {
   }
 }
 
+
 // Player Management
-.player-management {
+.player-management, .report-management {
   text-align: center;
   color: $text_color;
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   overflow: auto;
   transition: 0.3s;
 
-  .player-grid {
+  p {
+    font-size: 12px;
+  }
+
+  .player-grid, .report-grid {
     border: 2px solid $primary_color;
     border-radius: 10px;
-
   }
 
   .player-card {

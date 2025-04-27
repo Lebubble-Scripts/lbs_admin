@@ -137,6 +137,52 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
 
 end)
 
+-- CREATE TABLE IF NOT EXISTS reports (
+-- 	`reporter_id` INT(11) PRIMARY KEY,
+-- 	`reason` VARCHAR(8000),
+-- 	`timestamp` DATE DEFAULT CURRENT_TIMESTAMP,
+-- 	`status` VARCHAR(50)
+-- )
+
+lib.callback.register('lbs_admin:server:getReportList', function()
+    local response = MySQL.query.await('SELECT * FROM  `reports`')
+
+    local reports = {}
+
+    if response then
+        for i = 1, #response do
+            local row = response[i]
+            print(row.reporter_id, row.reason, row.status)
+            table.insert(reports, {
+                id = row.reporter_id,
+                name = GetPlayerName(row.reporter_id),
+                reason = row.reason,
+                status = row.status
+            })
+        end
+    end
+
+
+    return reports
+end)
+
+-- RegisterNetEvent('lbs_admin:server:submitReport', function(message)
+--     local src = source
+--     local results = MySQL.query.await('SELECT * FROM reports where reporter_id = ?', {src})
+--     print(results)
+    
+--     if results then
+--         TriggerClientEvent("ox_lib:notify", src, {
+--             title='Error',
+--             description='Cannot submit another report.',
+--             type='error'
+--         })
+--     else 
+--         MySQL.insert('INSERT INTO reports (reporter_id, reason, timestamp, status) VALUES (?, ?, ?, ?)', {
+--             src, message, os.time(), 'open'
+--         })
+--     end;
+-- end)
 
 
 ------------------------------
@@ -218,19 +264,5 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     end
 end)
 
--- RegisterNetEvent('lbs_admin:server:freeze_player', function(target)
---     print('server: freeze_player triggered')
---     local src = source
---     if not hasAdminPermissions(src) then return end
 
---     local admin = GetPlayerName(src)
---     local player = GetPlayerName(target)
 
---     print(string.format('Admin %s froze player %s', admin, player))
-
---     TriggerClientEvent('lbs_admin:client:freeze_player', target, true)
-
---     Citizen.SetTimeout(10000, function()
---         TriggerClientEvent('lbs_admin:client:freeze_player', target, false)
---     end)
--- end)

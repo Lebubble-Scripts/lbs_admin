@@ -107,6 +107,19 @@ RegisterNUICallback('getPlayerList', function(_, cb)
   end)
 end)
 
+RegisterNUICallback('submitReport', function(data)
+  print("submit report triggered")
+  print(data.message)
+  TriggerServerEvent('lbs_admin:server:submitReport', data.message)
+end)
+
+
+RegisterNUICallback('getReportList', function(_, cb)
+  lib.callback('lbs_admin:server:getReportList', false, function(reports)
+    cb(reports)
+  end)
+end)
+
 
 --Admin Options Buttons
 RegisterNUICallback('heal_self', function(_, cb)
