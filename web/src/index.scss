@@ -77,7 +77,6 @@ button {
   font-size: 28px;
   padding: 8px 18px;
   width: 10rem;
-
 }
 
 .nui-wrapper {
@@ -346,4 +345,51 @@ button {
     padding: 15px;
     margin-bottom: 20px;
   }
+}
+
+
+
+// Report Menu Styling
+.report-menu {
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  width: 768px;
+  height: 1024px;
+  background-color: rgba(0, 0, 0, 0.937);
+  border: 4px solid $primary_color;
+  border-radius: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h2 {
+    text-align: center;
+    color:$text_color;
+    font-size: 24px;
+  }
+
+  .close-report-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    font-size: 28px;
+    padding: 8px 18px;
+    width: 10rem;
+  }
+
+  textarea {
+    height:20%;
+    width:50%;
+    max-width: 75%;
+    max-height:60%;
+  }
+
 }
