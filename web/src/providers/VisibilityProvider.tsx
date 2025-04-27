@@ -8,12 +8,15 @@ import React, {
 import { useNuiEvent } from "../hooks/useNuiEvent";
 import { fetchNui } from "../utils/fetchNui";
 import { isEnvBrowser } from "../utils/misc";
+import ReportMenu from "../components/ReportMenu";
 
 const VisibilityCtx = createContext<VisibilityProviderValue | null>(null);
 
 interface VisibilityProviderValue {
   setVisible: (visible: boolean) => void;
   visible: boolean;
+  setReportMenuVisible: (reportMenuVisible: boolean) => void;
+  reportMenuVisible: boolean;
 }
 
 // This should be mounted at the top level of your application, it is currently set to
@@ -22,13 +25,16 @@ export const VisibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [visible, setVisible] = useState(false);
+  const [reportMenuVisible, setReportMenuVisible] = useState(false)
 
   useNuiEvent<boolean>("setVisible", setVisible);
+  useNuiEvent<boolean>("reportMenu", setReportMenuVisible)
+
 
   // Handle pressing escape
   useEffect(() => {
     // Only attach listener when we are visible
-    if (!visible) return;
+    if (!visible && !reportMenuVisible) return;
 
     const keyHandler = (e: KeyboardEvent) => {
       if (["Escape", "F3"].includes(e.code)) {
@@ -40,20 +46,29 @@ export const VisibilityProvider: React.FC<{ children: React.ReactNode }> = ({
     window.addEventListener("keydown", keyHandler);
 
     return () => window.removeEventListener("keydown", keyHandler);
-  }, [visible]);
+  }, [visible, reportMenuVisible]);
+
 
   return (
     <VisibilityCtx.Provider
       value={{
         visible,
         setVisible,
+        reportMenuVisible,
+        setReportMenuVisible: setReportMenuVisible,
       }}
     >
-      <div
-        style={{ visibility: visible ? "visible" : "hidden", height: "100%" }}
-      >
+    {visible && (
+      <div style={{visibility: "visible", height:'100%'}}>
         {children}
       </div>
+    )}
+      {reportMenuVisible && (
+        <div style={{ visibility: "visible", height: "100%" }}>
+          {/* Render the ReportMenu component or its children */}
+          <ReportMenu />
+        </div>
+      )}
     </VisibilityCtx.Provider>
   );
 };

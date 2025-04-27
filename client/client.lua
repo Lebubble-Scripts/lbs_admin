@@ -3,17 +3,18 @@
 --------------------
 local isSpectating = false
 local lastSpectateCoord = nil
-
-
 --------------------
 -- Functions
 --------------------
-
 local function toggleNuiFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
   SendReactMessage('setVisible', shouldShow)
 end
 
+local function toggleNuiReportsFrame(shouldShow)
+  SetNuiFocus(shouldShow, shouldShow)
+  SendReactMessage('reportMenu', shouldShow)
+end
 --------------------
 -- Commands
 --------------------
@@ -33,10 +34,8 @@ RegisterCommand('adminmenu', function()
 end, false)
 
 RegisterCommand('reportmenu', function()
-  print('test')
-  SendReactMessage('toggleReportMenu', true)
+  toggleNuiReportsFrame(true)
 end, false)
-
 -------------------
 -- Key Mappings
 -------------------
@@ -46,7 +45,6 @@ RegisterKeyMapping('adminmenu', 'Open Admin Menu', 'keyboard', 'F3')
 --------------------
 -- EVENTS
 --------------------
-
 RegisterNetEvent('openmenu', function()
     toggleNuiFrame(true)
     debugPrint('Show NUI Frame')
@@ -85,45 +83,21 @@ RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
   end)
 end)
 
--- RegisterNetEvent('lbs_admin:client:freeze_player', function(state)
---   print('client: freeze_player triggered')
---   local ped = PlayerPedId()
---   FreezeEntityPosition(ped, state)
-
---   if state then
---     SendReactMessage('showFreezeWarning', {
---       duration = 10000,
---       admin = true
---     })
-
---     Citizen.CreateThread(function()
---       while IsEntityPositionFrozen(ped) do
---         DisableAllControlActions(0)
---         EnableControlAction(0,1,true)
---         EnableControlAction(0,2,true)
---         Citizen.Wait(0)
---       end
---     end)
-
---     SendReactMessage('hideFreezeWarning', {})
---   end
--- end)
-
 --------------------
 --CALLBACKS
 --------------------
 
--- RegisterNUICallback('freeze_player', function(data, cb)
---   TriggerServerEvent('lbs_admin:server:freeze_player', data.target, data.reason)
---   cb({})
--- end)
-
-RegisterNUICallback('hideFrame', function(_, cb)
+RegisterNUICallback('hideAdminMenu', function(_, cb)
   toggleNuiFrame(false)
-  SetNuiFocus(false, false)
-  SendReactMessage('setVisible', false)
   debugPrint('Hide NUI frame')
   cb({})
+end)
+
+RegisterNUICallback('hideReportMenu', function(_, cb)
+  toggleNuiReportsFrame(false)
+  debugPrint('Hide Report Menu')
+  cb({})
+
 end)
 
 
