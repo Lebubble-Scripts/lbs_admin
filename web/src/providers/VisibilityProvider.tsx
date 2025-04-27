@@ -37,9 +37,12 @@ export const VisibilityProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!visible && !reportMenuVisible) return;
 
     const keyHandler = (e: KeyboardEvent) => {
-      if (["Escape", "F3"].includes(e.code)) {
-      if (!isEnvBrowser()) fetchNui("hideFrame");
-      else setVisible(!visible);
+      if (["Escape", "F3", 'F10'].includes(e.code)) {
+        if (!isEnvBrowser()) {
+          fetchNui("hideAdminMenu");
+          fetchNui('hideReportMenu');
+        } 
+        else setVisible(!visible);
       }
     };
 
