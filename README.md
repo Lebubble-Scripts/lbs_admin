@@ -12,17 +12,23 @@ A basic guide to install the lbs_admin_react resource via Keymaster.
     ```
     ensure lbs_admin_react
     ```
-3. (optional) Place the lbs_admin_react folder into [standalone]
-    ```
-    /c:/txData/QBCoreFramework_F454F1.base/resources/[standalone]
-    ```
 
 
 ## Usage
 
-Once installed, restart your QBCore server. The lbs_admin_react interface should be available according to your project's admin setup.
+`[Commands]`
+    
+    /adminmenu
+    /reportmenu
 
-You can open the menu by using ```/adminmenu``` or hitting ```F3```
+`[Hotkeys]`
+
+    F3 - Admin Menu
+    F10 - Report Menu
+
+## Report System
+
+We are working on adding a comprehensive report system to the admin menu for quickly dealing with issues in your server. Use the /reportmenu command to preview! Keep your eye out for more updates!
 
 ## Configuration
 
