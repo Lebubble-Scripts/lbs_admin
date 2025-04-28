@@ -138,16 +138,11 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
 end)
 
 lib.callback.register('lbs_admin:server:checkPlayerReports', function()
-    
-    print('checking if player has a report')
     local src = source
-
     local row = MySQL.single.await('SELECT * FROM `reports` where reporter_id = ?', {
         src
     })
-
     if not row then return false end
-
     return true
 end)
 

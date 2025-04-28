@@ -118,7 +118,6 @@ RegisterNUICallback('getPlayerList', function(_, cb)
 end)
 
 RegisterNUICallback('submitReport', function(data)
-  print("submit report triggered")
   print(data.message)
   TriggerServerEvent('lbs_admin:server:submitReport', data.message)
   toggleNuiReportsFrame(false)
