@@ -34,7 +34,17 @@ RegisterCommand('adminmenu', function()
 end, false)
 
 RegisterCommand('reportmenu', function()
-  toggleNuiReportsFrame(true)
+  lib.callback('lbs_admin:server:checkPlayerReports', false, function(hasReport)
+    if hasReport then
+      TriggerEvent('ox_lib:notify', {
+        title='Reports',
+        description = 'You already have an open report.',
+        type='info'
+      })
+    else
+      toggleNuiReportsFrame(true)
+    end
+  end, true)
 end, false)
 -------------------
 -- Key Mappings
@@ -57,7 +67,7 @@ RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
 end)
 
 RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
-  TriggerServerEvent('lbs_admin:server:check_permissions', function(idAdmin)
+  TriggerServerEvent('lbs_admin:server:check_permissions', function(isAdmin)
     if not isAdmin then return end
     local myPed = PlayerPedId()
     local targetPlayer = GetPlayerFromServerId(targetPed)
@@ -111,6 +121,7 @@ RegisterNUICallback('submitReport', function(data)
   print("submit report triggered")
   print(data.message)
   TriggerServerEvent('lbs_admin:server:submitReport', data.message)
+  toggleNuiReportsFrame(false)
 end)
 
 
@@ -202,5 +213,13 @@ RegisterNUICallback('player_action', function(data, cb)
   local duration = data.duration
   local durationUnit = data.durationUnit
   TriggerServerEvent('lbs_admin:server:player_action', action, target, reason, duration, durationUnit)
+  cb({})
+end)
+
+RegisterNUICallback('report_action', function(data, cb)
+  print('report action triggered')
+  local action = data.action
+  local target = data.target
+  TriggerServerEvent('lbs_admin:server:report_action', action, target)
   cb({})
 end)

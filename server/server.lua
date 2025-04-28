@@ -137,12 +137,19 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
 
 end)
 
--- CREATE TABLE IF NOT EXISTS reports (
--- 	`reporter_id` INT(11) PRIMARY KEY,
--- 	`reason` VARCHAR(8000),
--- 	`timestamp` DATE DEFAULT CURRENT_TIMESTAMP,
--- 	`status` VARCHAR(50)
--- )
+lib.callback.register('lbs_admin:server:checkPlayerReports', function()
+    
+    print('checking if player has a report')
+    local src = source
+
+    local row = MySQL.single.await('SELECT * FROM `reports` where reporter_id = ?', {
+        src
+    })
+
+    if not row then return false end
+
+    return true
+end)
 
 lib.callback.register('lbs_admin:server:getReportList', function()
     local response = MySQL.query.await('SELECT * FROM  `reports`')
@@ -166,28 +173,34 @@ lib.callback.register('lbs_admin:server:getReportList', function()
     return reports
 end)
 
--- RegisterNetEvent('lbs_admin:server:submitReport', function(message)
---     local src = source
---     local results = MySQL.query.await('SELECT * FROM reports where reporter_id = ?', {src})
---     print(results)
-    
---     if results then
---         TriggerClientEvent("ox_lib:notify", src, {
---             title='Error',
---             description='Cannot submit another report.',
---             type='error'
---         })
---     else 
---         MySQL.insert('INSERT INTO reports (reporter_id, reason, timestamp, status) VALUES (?, ?, ?, ?)', {
---             src, message, os.time(), 'open'
---         })
---     end;
--- end)
-
 
 ------------------------------
 --Events
 ------------------------------
+---@param action string: specific actin taken on report modal
+---@param target number: target player to get report for
+RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
+    print('report action triggered')
+    local src = source
+    if not target then return end
+    if action == 'close' then
+        print('close action triggered')
+        if hasAdminPermissions(src) then
+
+            local queries = {
+                {query = 'DELETE FROM `reports` WHERE reporter_id = ?', values= {target}}
+            }
+            MySQL.transaction.await(queries)
+
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='Closed',
+                description='Ticket closed',
+                type='success'
+            })
+        end
+    end
+
+end)
 
 ---@param action string: specific actin taken on player modal
 ---@param target number: target player action should be executed on
@@ -264,5 +277,24 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     end
 end)
 
+RegisterNetEvent('lbs_admin:server:submitReport', function(message)
+    local src = source
+
+    MySQL.insert('INSERT INTO `reports` (reporter_id, reason, timestamp, status) VALUES (?, ?, ?, ?)', {
+        src, message, os.date('%Y-%m-%d %H:%M:%S'), 'open'
+    })
+
+    TriggerClientEvent('ox_lib:notify', src, {
+        title='Reports',
+        description = 'Report successfully submitted!',
+        type='success'
+    })
+end)
 
 
+-- CREATE TABLE IF NOT EXISTS reports (
+-- 	`reporter_id` INT(11) PRIMARY KEY,
+-- 	`reason` VARCHAR(8000),
+-- 	`timestamp` DATE DEFAULT CURRENT_TIMESTAMP,
+-- 	`status` VARCHAR(50)
+-- )

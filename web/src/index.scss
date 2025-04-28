@@ -176,12 +176,8 @@ button {
     font-size: 12px;
   }
 
-  .player-grid, .report-grid {
-    border: 2px solid $primary_color;
-    border-radius: 10px;
-  }
 
-  .player-card {
+  .player-card, .report-card {
     padding: 25px;
     align-items: center;
     justify-content: center;
@@ -343,7 +339,7 @@ button {
     }
   }
   
-  .player-info {
+  .player-info, .report-info {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     padding: 15px;
