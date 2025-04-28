@@ -8,10 +8,21 @@ A basic guide to install the lbs_admin_react resource via Keymaster.
     ```
     /c:/txData/QBCoreFramework_F454F1.base/resources/
     ```
-2. Ensure lbs_admin_react
+2. Run `database.sql` in your sql environment
+    ```sql
+    CREATE TABLE IF NOT EXISTS reports (
+     	`reporter_id` INT(11) PRIMARY KEY,
+     	`reason` VARCHAR(8000),
+     	`timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+     	`status` VARCHAR(50)
+     )
+    ```
+
+3. Ensure lbs_admin_react
     ```
     ensure lbs_admin_react
     ```
+
 
 
 ## Usage
@@ -28,7 +39,11 @@ A basic guide to install the lbs_admin_react resource via Keymaster.
 
 ## Report System
 
-We are working on adding a comprehensive report system to the admin menu for quickly dealing with issues in your server. Use the /reportmenu command to preview! Keep your eye out for more updates!
+All players have access to use the `F10` report menu. This menu allows the player to describe the issue they are having. 
+
+Admin will be able to see the reports in their `F3` admin menu. From there, admins can teleport to the player to investigate, or close the ticket. 
+
+All tickets are stored in the database to ensure they survive server restarts. 
 
 ## Configuration
 
