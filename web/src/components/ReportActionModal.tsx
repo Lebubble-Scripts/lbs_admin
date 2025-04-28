@@ -29,8 +29,9 @@ export default function ReportActionModal({
         onPlayerAction(action, report.id)
     }
 
-    const handleReportAction = (action: string) => {
-        onReportAction(action, report.id)
+    const handleCloseTicket = () => {
+        onReportAction('close', report.id)
+        if (onClose) onClose()
     }
 
 
@@ -52,7 +53,7 @@ export default function ReportActionModal({
                 </div>
                 <div className='report-action'>
                     <h4>Report Action</h4>
-                    <button onClick={() => handleReportAction('close')} className='action-button close'>
+                    <button onClick={handleCloseTicket} className='action-button close'>
                         Close Report
                     </button>
                 </div>

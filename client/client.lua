@@ -217,7 +217,6 @@ RegisterNUICallback('player_action', function(data, cb)
 end)
 
 RegisterNUICallback('report_action', function(data, cb)
-  print('report action triggered')
   local action = data.action
   local target = data.target
   TriggerServerEvent('lbs_admin:server:report_action', action, target)

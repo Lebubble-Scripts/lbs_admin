@@ -45,6 +45,18 @@ export default function AdminReportMenu() {
     const handleCloseModal = () => {
         setModalOpened(false);
         setSelectedReport(null);
+        fetchReports()
+    }
+
+    const fetchReports = () => {
+        fetchNui<Reports[]>('getReportList')
+        .then((data) => {
+            setReports(data);
+        })
+        .catch((e)=> {
+            console.error('Error retrieving reports list ', e);
+            setReports([]);
+        });
     }
 
     const handlePlayerServerAction = (
@@ -59,7 +71,7 @@ export default function AdminReportMenu() {
         fetchNui('player_action', payload)
     }
 
-    const handleReportServerAction = (
+    const handleReportServerAction = async (
         action:string,
         id:number
     ) => {
@@ -67,21 +79,14 @@ export default function AdminReportMenu() {
             action: action,
             target: id,
         }
-
-        fetchNui('report_action', payload)
+        await fetchNui('report_action', payload)
+        fetchReports()
     }
 
 
 
     useEffect(() => {
-        fetchNui<Reports[]>('getReportList')
-        .then((data) => {
-            setReports(data);
-        })
-        .catch((e)=> {
-            console.error('Error retrieving reports list ', e);
-            setReports([]);
-        });
+        fetchReports()
     }, []);
 
     type ReportStatus = 'open' | 'closed' | 'default'

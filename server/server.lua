@@ -159,7 +159,6 @@ lib.callback.register('lbs_admin:server:getReportList', function()
     if response then
         for i = 1, #response do
             local row = response[i]
-            print(row.reporter_id, row.reason, row.status)
             table.insert(reports, {
                 id = row.reporter_id,
                 name = GetPlayerName(row.reporter_id),
@@ -180,11 +179,9 @@ end)
 ---@param action string: specific actin taken on report modal
 ---@param target number: target player to get report for
 RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
-    print('report action triggered')
     local src = source
     if not target then return end
     if action == 'close' then
-        print('close action triggered')
         if hasAdminPermissions(src) then
 
             local queries = {
