@@ -8,7 +8,7 @@
 
 body {
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
-  font-size: 18px;
+  font-size: 24px;
 }
 
 @keyframes modalFadeIn {
@@ -40,12 +40,12 @@ $text_color: white;
 
 button {
   background: $primary_color;
-  border-radius: 999px;
+  border-radius: 10px;
   box-shadow: none;
   box-sizing: border-box;
   color: $text_color;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 24px;
   opacity: 1;
@@ -84,8 +84,8 @@ button {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 768px;
-  height: 1024px;
+  width: 60%;
+  height: 80%;
   background-color: rgba(0, 0, 0, 0.937);
   border: 4px solid $primary_color;
   border-radius: 40px;
@@ -108,7 +108,7 @@ button {
     flex: 1;
     font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
     display: flex;
-    font-size: 24px;
+    font-size: 30px;
     justify-content: center;
     align-items: center;
     padding: 12px 0;
@@ -165,7 +165,7 @@ button {
 
 
 // Player Management
-.player-management, .report-management {
+.player-management, .report-management, .ban-management {
   text-align: center;
   color: $text_color;
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
@@ -173,11 +173,11 @@ button {
   transition: 0.3s;
 
   p {
-    font-size: 12px;
+    font-size: 18px;
   }
 
 
-  .player-card, .report-card {
+  .player-card, .report-card, .ban-card {
     padding: 25px;
     align-items: center;
     justify-content: center;
@@ -195,7 +195,7 @@ button {
     }
 
     button {
-      font-size: 12px;
+      font-size: 20px;
       
     }
   }
@@ -212,7 +212,7 @@ button {
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
   
   h3 {
-    font-size: 24px;
+    font-size: 30px;
   }
 }
 
@@ -249,7 +249,9 @@ button {
     width: 10vh;
     margin-top: 5.5vh;
   }
-
+  li {
+    padding: 10px;
+  }
   
   
 
@@ -283,7 +285,7 @@ button {
       }
 
       label {
-        font-size: 14px;
+        font-size: 24px;
       }
       input, select {
         padding: 5px;
@@ -345,6 +347,8 @@ button {
     padding: 15px;
     margin-bottom: 20px;
   }
+  .report-info {
+  }
 }
 
 
@@ -370,7 +374,7 @@ button {
   h2 {
     text-align: center;
     color:$text_color;
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .close-report-menu {
@@ -380,7 +384,7 @@ button {
     margin: 0 auto;
     margin-bottom: 15px;
     margin-top: 15px;
-    font-size: 28px;
+    font-size: 20px;
     padding: 8px 18px;
     width: 10rem;
   }

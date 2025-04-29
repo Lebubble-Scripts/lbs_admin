@@ -9,6 +9,8 @@ if Config.EnableDebugMode then
     end
 end
 
+local json = require('json')
+
 local QBCore = nil
 
 if Config.Framework == 'qb' or Config.Framework == 'qbx' then 
@@ -18,9 +20,12 @@ else
 end
 
 
+
+
 ------------------------------
 -- FUNCTIONS
 ------------------------------
+
 function send_to_discord_log(title, description, color)
     local webhook = Config.DiscordWebhook
     if (not webhook or webhook == '') and Config.EnableDebugMode then 
@@ -167,6 +172,100 @@ lib.callback.register('lbs_admin:server:getReportList', function()
     return reports
 end)
 
+lib.callback.register('lbs_admin:server:getBansList', function()
+    local bans = {}
+
+    if Config.BanProvider == 'qb' then
+        local response = MySQL.query.await('SELECT * FROM `bans`')
+
+        if response then
+            for i = 1, #response do
+                local row = response[i]
+                table.insert(bans, {
+                    id = row.id,
+                    name=row.name,
+                    license=row.license,
+                    discord=row.discord,
+                    ip=row.ip,
+                    reason=row.reason,
+                    expire=row.expire,
+                    bannedby=row.bannedby
+                })
+            end
+        end
+    elseif Config.BanProvider == 'ws' then
+        print('trying waveshiled')
+        local resourceName = GetCurrentResourceName()
+        local filePath = GetResourcePath(resourceName) .. '/bans.json' 
+
+        local file = io.open(filePath, 'r')
+        if not file then
+            print('Failed to find bans.json')
+            return
+        end
+
+        local fileContent = file:read('*a')
+        file:close()
+
+        --debugText('Raw file content: ' .. fileContent)
+        
+        local response = json.decode(fileContent)
+        if not response then 
+            print('Failed to parse bans.json')
+            return
+        end
+
+        if response == nil then
+            print('Bans is nil')
+            return
+        elseif next(response) == nil then
+            print('Bans is an empty table')
+            return
+        end
+        
+
+        for key, ban in pairs(response) do
+            print('printing ban')
+            print('Key:', key) -- This is the unique ban ID (e.g., "waveshield_ban_529708")
+            print('Ban Data:', ban)
+        
+            -- Extract identifiers
+            local license = nil
+            local discord = nil
+            local ip = nil
+        
+            if ban.identifiers then
+                for identifier, _ in pairs(ban.identifiers) do
+                    if identifier:find("license:") then
+                        license = identifier
+                    elseif identifier:find("discord:") then
+                        discord = identifier
+                    elseif identifier:find("ip:") then
+                        ip = identifier
+                    end
+                end
+            end
+
+            print(license)
+            print(discord)
+            print(ip)
+            
+        
+            -- Insert the ban into the table
+            table.insert(bans, {
+                id = key, -- Use the key as the unique ban ID
+                name = ban.name or "Unknown",
+                license = license or "N/A",
+                discord = discord or "N/A",
+                ip = ip or "N/A",
+                reason = ban.reason or "No reason provided",
+                expire = ban.expires or 0,
+                bannedby = "WaveShield"
+            })
+        end
+    end
+    return bans
+end)
 
 ------------------------------
 --Events
@@ -283,10 +382,3 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
     })
 end)
 
-
--- CREATE TABLE IF NOT EXISTS reports (
--- 	`reporter_id` INT(11) PRIMARY KEY,
--- 	`reason` VARCHAR(8000),
--- 	`timestamp` DATE DEFAULT CURRENT_TIMESTAMP,
--- 	`status` VARCHAR(50)
--- )

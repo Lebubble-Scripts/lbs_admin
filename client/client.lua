@@ -130,6 +130,12 @@ RegisterNUICallback('getReportList', function(_, cb)
   end)
 end)
 
+RegisterNUICallback('getBansList', function(_, cb)
+  lib.callback('lbs_admin:server:getBansList', false, function(bans)
+    cb(bans)
+  end)
+end)
+
 
 --Admin Options Buttons
 RegisterNUICallback('heal_self', function(_, cb)

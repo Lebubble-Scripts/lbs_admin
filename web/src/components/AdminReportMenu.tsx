@@ -37,7 +37,7 @@ export default function AdminReportMenu() {
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [modalOpened, setModalOpened] = useState(false);
 
-    const handleOpenModel = (report: Report) => {
+    const handleOpenModal = (report: Report) => {
         setSelectedReport(report);
         setModalOpened(true);
     }
@@ -100,50 +100,50 @@ export default function AdminReportMenu() {
 
     return (
         <div className='report-management'>
-        <h2>Reports</h2>
-        <div className='report-grid' style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-            gap: '16px'
-        }}
-        >
-            {
-                reports.map((report) => {
-                    // Define background colors for statuses
-                    const statusColors = {
-                        open: 'yellow',
-                        resolved: 'green',
-                        rejected: 'red',
-                        default: 'gray'
-                    };
+            <h2>Reports</h2>
+            <div className='report-grid' style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: '16px'
+            }}
+            >
+                {
+                    reports.map((report) => {
+                        // Define background colors for statuses
+                        const statusColors = {
+                            open: 'yellow',
+                            resolved: 'green',
+                            rejected: 'red',
+                            default: 'gray'
+                        };
 
-                    // Determine background color based on report status
-                    const color = statusColors[report.status] || statusColors.default;
+                        // Determine background color based on report status
+                        const color = statusColors[report.status] || statusColors.default;
 
-                    return (
-                        <div 
-                            key={report.id}
-                            className='report-card'
-                        >
-                            <button onClick={() => handleOpenModel(report)}>
-                                {report.name}
-                            </button>
-                            <p>{report.reason.slice(0, 50)}...</p>
-                            <p style={{color}}>{report.status}</p>
-                        </div>
-                    );
-                })
-            }
-            {selectedReport &&  (
-                <ReportActionModal 
-                    opened={modalOpened}
-                    report={selectedReport}
-                    onPlayerAction={handlePlayerServerAction}
-                    onReportAction={handleReportServerAction}
-                    onClose={handleCloseModal}
-                />
-            )}    
+                        return (
+                            <div
+                                key={report.id}
+                                className='report-card'
+                            >
+                                <button onClick={() => handleOpenModal(report)}>
+                                    {report.name}
+                                </button>
+                                <p>{report.reason.slice(0, 50)}...</p>
+                                <p style={{ color }}>{report.status}</p>
+                            </div>
+                        );
+                    })
+                }
+                {selectedReport && (
+                    <ReportActionModal
+                        opened={modalOpened}
+                        report={selectedReport}
+                        onPlayerAction={handlePlayerServerAction}
+                        onReportAction={handleReportServerAction}
+                        onClose={handleCloseModal}
+                    />
+                )}
+            </div>
         </div>
-    </div>
     )
 }

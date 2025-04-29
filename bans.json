@@ -1,0 +1,30 @@
+{
+    "waveshield_ban_529708": {
+            "screenshot": "https://media.discordapp.net/attachments/1350790603226611883/1366792808320602132/game-capture.webm?ex=68123c7f&is=6810eaff&hm=59fa7abbf36985b8f16cf7c349b0f3d095e6274c9a242e781aa2f395fac94d56&",
+            "extraIdentifiers": {
+                "g9tQIbEJLOcjovIp74H3RyGBqTFCMBADExeb4LQl3UOMFOjcMXvG29pqIq6XT5QT1": true,
+                "01bda320f53c7af84fafdd50a1ee844d515c3c1615b2927dc1b6326943823a30": true,
+                "44c0d9b6fb218cd6fa58cc7a535690475d6499332967a275004afa07b1253d3d": true
+            },
+            "name": "maybach",
+            "identifiers": {
+                "4:d864d40649b7458015f7904861197b52e779e94084c3b2167d4ad43e8821bf4b": true,
+                "license2:fb2f9f37593fa66148d8c8be6300eaddd150fd2b": true,
+                "discord:941469849404710922": true,
+                "license:fb2f9f37593fa66148d8c8be6300eaddd150fd2b": true,
+                "live:844425138054954": true,
+                "2:e13e3779f118e4b97132fbddbe2f0ae1a4b21a0abdc428a0fcbb323709bb01f9": true,
+                "xbl:2535431815877428": true,
+                "4:c7ca0ee4657915179ea351d62bd4816ea9a439ec82e9afd53b3fd0e845016041": true,
+                "ip:73.67.203.62": true,
+                "4:7a8f89fc7e79bbac0e417ada4a406014c322888a797ec9629256556c23d36069": true,
+                "5:693ac125c53d30a5220a895a26adb3e5e2db1a51a2a6e74d7e2e5b3c56f12e03": true,
+                "3:3118f74021a1e093f6f5c6ba2a8fc864d65cc47936922f1820a66099eda6d5f7": true
+            },
+            "date": 1745960796,
+            "id": "waveshield_ban_529708",
+            "expires": 1777475196,
+            "reason": "Attempted to spawn a blacklisted object.",
+            "extended": "Object Model: -331172978"
+        }
+}
