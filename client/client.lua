@@ -3,6 +3,7 @@
 --------------------
 local isSpectating = false
 local lastSpectateCoord = nil
+local imgurClientId = Config.ImgurAPIClientKey
 --------------------
 -- Functions
 --------------------
@@ -15,6 +16,7 @@ local function toggleNuiReportsFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
   SendReactMessage('reportMenu', shouldShow)
 end
+
 --------------------
 -- Commands
 --------------------
@@ -34,8 +36,19 @@ RegisterCommand('adminmenu', function()
 end, false)
 
 RegisterCommand('reportmenu', function()
-  toggleNuiReportsFrame(true)
+  lib.callback('lbs_admin:server:checkPlayerReports', false, function(hasReport)
+    if hasReport then
+      TriggerEvent('ox_lib:notify', {
+        title='Reports',
+        description = 'You already have an open report.',
+        type='info'
+      })
+    else
+      toggleNuiReportsFrame(true)
+    end
+  end, true)
 end, false)
+
 -------------------
 -- Key Mappings
 -------------------
@@ -57,7 +70,7 @@ RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
 end)
 
 RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
-  TriggerServerEvent('lbs_admin:server:check_permissions', function(idAdmin)
+  TriggerServerEvent('lbs_admin:server:check_permissions', function(isAdmin)
     if not isAdmin then return end
     local myPed = PlayerPedId()
     local targetPlayer = GetPlayerFromServerId(targetPed)
@@ -105,6 +118,48 @@ RegisterNUICallback('getPlayerList', function(_, cb)
   lib.callback('lbs_admin:server:getPlayerList', false, function(players)
     cb(players)
   end)
+end)
+
+RegisterNUICallback('submitReport', function(data)
+  print(data.message)
+  TriggerServerEvent('lbs_admin:server:submitReport', data.message)
+  toggleNuiReportsFrame(false)
+end)
+
+
+RegisterNUICallback('getReportList', function(_, cb)
+  lib.callback('lbs_admin:server:getReportList', false, function(reports)
+    cb(reports)
+  end)
+end)
+
+RegisterNUICallback('getBansList', function(_, cb)
+  lib.callback('lbs_admin:server:getBansList', false, function(bans)
+    cb(bans)
+  end)
+end)
+
+RegisterNUICallback('getVehiclesList', function(_,cb)
+    local vehicles = {}
+    local vehicleList = GetGamePool('CVehicle')
+    print("Vehicle List:", vehicleList)
+    print("Number of Vehicles:", #vehicleList)
+
+    for i = 1, #vehicleList do
+        local vehicleModel = GetEntityModel(vehicleList[i])
+        print("Vehicle Entity:", vehicleList[i], "Model:", vehicleModel)
+        if vehicleModel then
+            local vehicleName = GetDisplayNameFromVehicleModel(vehicleModel)
+            print("Vehicle Name:", vehicleName)
+            table.insert(vehicles, {
+                model = vehicleModel,
+                name = vehicleName
+            })
+        else
+            print("Invalid vehicle model for entity:", vehicleList[i])
+        end
+    end
+    cb(vehicles)
 end)
 
 
@@ -189,5 +244,12 @@ RegisterNUICallback('player_action', function(data, cb)
   local duration = data.duration
   local durationUnit = data.durationUnit
   TriggerServerEvent('lbs_admin:server:player_action', action, target, reason, duration, durationUnit)
+  cb({})
+end)
+
+RegisterNUICallback('report_action', function(data, cb)
+  local action = data.action
+  local target = data.target
+  TriggerServerEvent('lbs_admin:server:report_action', action, target)
   cb({})
 end)

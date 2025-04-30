@@ -9,7 +9,9 @@ if Config.EnableDebugMode then
     end
 end
 
-local QBCore = nil
+-- local json = require('json')
+
+-- local QBCore = nil
 
 if Config.Framework == 'qb' or Config.Framework == 'qbx' then 
     QBCore = exports['qb-core']:GetCoreObject()
@@ -18,9 +20,12 @@ else
 end
 
 
+
+
 ------------------------------
 -- FUNCTIONS
 ------------------------------
+
 function send_to_discord_log(title, description, color)
     local webhook = Config.DiscordWebhook
     if (not webhook or webhook == '') and Config.EnableDebugMode then 
@@ -137,11 +142,155 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
 
 end)
 
+lib.callback.register('lbs_admin:server:checkPlayerReports', function()
+    local src = source
+    local row = MySQL.single.await('SELECT * FROM `reports` where reporter_id = ?', {
+        src
+    })
+    if not row then return false end
+    return true
+end)
 
+lib.callback.register('lbs_admin:server:getReportList', function()
+    local response = MySQL.query.await('SELECT * FROM  `reports`')
+
+    local reports = {}
+
+    if response then
+        for i = 1, #response do
+            local row = response[i]
+            table.insert(reports, {
+                id = row.reporter_id,
+                name = GetPlayerName(row.reporter_id),
+                reason = row.reason,
+                status = row.status
+            })
+        end
+    end
+
+
+    return reports
+end)
+
+lib.callback.register('lbs_admin:server:getBansList', function()
+    local bans = {}
+
+    if Config.BanProvider == 'qb' then
+        local response = MySQL.query.await('SELECT * FROM `bans`')
+
+        if response then
+            for i = 1, #response do
+                local row = response[i]
+                table.insert(bans, {
+                    id = row.id,
+                    name=row.name,
+                    license=row.license,
+                    discord=row.discord,
+                    ip=row.ip,
+                    reason=row.reason,
+                    expire=row.expire,
+                    bannedby=row.bannedby
+                })
+            end
+        end
+    elseif Config.BanProvider == 'ws' then
+        print('trying waveshiled')
+        local resourceName = GetCurrentResourceName()
+        local filePath = GetResourcePath(resourceName) .. '/bans.json' 
+
+        local file = io.open(filePath, 'r')
+        if not file then
+            print('Failed to find bans.json')
+            return
+        end
+
+        local fileContent = file:read('*a')
+        file:close()
+
+        --debugText('Raw file content: ' .. fileContent)
+        
+        local response = json.decode(fileContent)
+        if not response then 
+            print('Failed to parse bans.json')
+            return
+        end
+
+        if response == nil then
+            print('Bans is nil')
+            return
+        elseif next(response) == nil then
+            print('Bans is an empty table')
+            return
+        end
+        
+
+        for key, ban in pairs(response) do
+            print('printing ban')
+            print('Key:', key) -- This is the unique ban ID (e.g., "waveshield_ban_529708")
+            print('Ban Data:', ban)
+        
+            -- Extract identifiers
+            local license = nil
+            local discord = nil
+            local ip = nil
+        
+            if ban.identifiers then
+                for identifier, _ in pairs(ban.identifiers) do
+                    if identifier:find("license:") then
+                        license = identifier
+                    elseif identifier:find("discord:") then
+                        discord = identifier
+                    elseif identifier:find("ip:") then
+                        ip = identifier
+                    end
+                end
+            end
+
+            print(license)
+            print(discord)
+            print(ip)
+            
+        
+            -- Insert the ban into the table
+            table.insert(bans, {
+                id = key, -- Use the key as the unique ban ID
+                name = ban.name or "Unknown",
+                license = license or "N/A",
+                discord = discord or "N/A",
+                ip = ip or "N/A",
+                reason = ban.reason or "No reason provided",
+                expire = ban.expires or 0,
+                bannedby = "WaveShield"
+            })
+        end
+    end
+    return bans
+end)
 
 ------------------------------
 --Events
 ------------------------------
+---@param action string: specific actin taken on report modal
+---@param target number: target player to get report for
+RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
+    local src = source
+    if not target then return end
+    if action == 'close' then
+        if hasAdminPermissions(src) then
+
+            local queries = {
+                {query = 'DELETE FROM `reports` WHERE reporter_id = ?', values= {target}}
+            }
+            MySQL.transaction.await(queries)
+
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='Closed',
+                description='Ticket closed',
+                type='success'
+            })
+        end
+    end
+end)
 
 ---@param action string: specific actin taken on player modal
 ---@param target number: target player action should be executed on
@@ -179,12 +328,6 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         local coords = GetEntityCoords(GetPlayerPed(src))
         send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
-    -- elseif action == 'warn' then
-    --     local admin = GetPlayerName(source)
-    --     local player = GetPlayerName(target)
-    
-    --     print(string.format('Admin %s froze player %s', admin, player))
-    --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
     elseif action == 'spectate' then
         if hasAdminPermissions(source) then
             if source == target then 
@@ -218,19 +361,18 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     end
 end)
 
--- RegisterNetEvent('lbs_admin:server:freeze_player', function(target)
---     print('server: freeze_player triggered')
---     local src = source
---     if not hasAdminPermissions(src) then return end
+RegisterNetEvent('lbs_admin:server:submitReport', function(message)
+    local src = source
 
---     local admin = GetPlayerName(src)
---     local player = GetPlayerName(target)
+    MySQL.insert('INSERT INTO `reports` (reporter_id, reason, timestamp, status) VALUES (?, ?, ?, ?)', {
+        src, message, os.date('%Y-%m-%d %H:%M:%S'), 'open'
+    })
 
---     print(string.format('Admin %s froze player %s', admin, player))
+    TriggerClientEvent('ox_lib:notify', src, {
+        title='Reports',
+        description = 'Report successfully submitted!',
+        type='success'
+    })
+end)
 
---     TriggerClientEvent('lbs_admin:client:freeze_player', target, true)
 
---     Citizen.SetTimeout(10000, function()
---         TriggerClientEvent('lbs_admin:client:freeze_player', target, false)
---     end)
--- end)
