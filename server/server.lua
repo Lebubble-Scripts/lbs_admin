@@ -9,9 +9,9 @@ if Config.EnableDebugMode then
     end
 end
 
-local json = require('json')
+-- local json = require('json')
 
-local QBCore = nil
+-- local QBCore = nil
 
 if Config.Framework == 'qb' or Config.Framework == 'qbx' then 
     QBCore = exports['qb-core']:GetCoreObject()
@@ -290,7 +290,6 @@ RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
             })
         end
     end
-
 end)
 
 ---@param action string: specific actin taken on player modal
@@ -329,12 +328,6 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         local coords = GetEntityCoords(GetPlayerPed(src))
         send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
         TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
-    -- elseif action == 'warn' then
-    --     local admin = GetPlayerName(source)
-    --     local player = GetPlayerName(target)
-    
-    --     print(string.format('Admin %s froze player %s', admin, player))
-    --     TriggerClientEvent('lbs_admin:client:freeze_player',target, true, reason)
     elseif action == 'spectate' then
         if hasAdminPermissions(source) then
             if source == target then 

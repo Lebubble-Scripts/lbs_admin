@@ -7,15 +7,17 @@ interface Reports {
     id: number,
     name: string,
     reason: string,
-    status: string
+    status: 'open' | 'resolved' | 'rejected' | 'default';
 }
 
 type Report = {
-    id: string;
+    id: number;
     name: string;
     reason: string;
-    status: 'open' | 'closed' | 'default';
+    status: 'open' | 'resolved' | 'rejected' | 'default';
 }
+
+type StatusKey = 'open' | 'resolved' | 'rejected' | 'default';
 
 // const mockReports: Reports[] = [
 //     { id: 1, name: 'user1', reason: 'This is a test reason that goes well past fifty characters to ensure proper display.', status: 'open' },
@@ -33,6 +35,12 @@ type Report = {
 
 
 export default function AdminReportMenu() {
+    const statusMessages = {
+    open: 'Report is open',
+    resolved: 'Report has been resolved',
+    rejected: 'Report has been rejected',
+    default: 'Unknown status',
+};
     const [reports, setReports] = useState<Reports[]>([]);
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [modalOpened, setModalOpened] = useState(false);

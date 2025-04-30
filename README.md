@@ -17,8 +17,17 @@ A basic guide to install the lbs_admin_react resource via Keymaster.
      	`status` VARCHAR(50)
      )
     ```
-
-3. Ensure lbs_admin_react
+3. Configure the script in config.lua
+    ```
+    Double check all settings to confirm they align with your server's setup
+    ```
+4. Update Server Image
+    ```
+    Upload your server image to the build/assets/images folder.
+    
+    Ensure the filename is `BackgroundImage.png` otherwise it will not work. 
+    ```
+5. Ensure lbs_admin_react
     ```
     ensure lbs_admin_react
     ```

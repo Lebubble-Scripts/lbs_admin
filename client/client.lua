@@ -139,6 +139,29 @@ RegisterNUICallback('getBansList', function(_, cb)
   end)
 end)
 
+RegisterNUICallback('getVehiclesList', function(_,cb)
+    local vehicles = {}
+    local vehicleList = GetGamePool('CVehicle')
+    print("Vehicle List:", vehicleList)
+    print("Number of Vehicles:", #vehicleList)
+
+    for i = 1, #vehicleList do
+        local vehicleModel = GetEntityModel(vehicleList[i])
+        print("Vehicle Entity:", vehicleList[i], "Model:", vehicleModel)
+        if vehicleModel then
+            local vehicleName = GetDisplayNameFromVehicleModel(vehicleModel)
+            print("Vehicle Name:", vehicleName)
+            table.insert(vehicles, {
+                model = vehicleModel,
+                name = vehicleName
+            })
+        else
+            print("Invalid vehicle model for entity:", vehicleList[i])
+        end
+    end
+    cb(vehicles)
+end)
+
 
 --Admin Options Buttons
 RegisterNUICallback('heal_self', function(_, cb)

@@ -54,19 +54,6 @@ export default function AdminReportMenu() {
     }
 
     useEffect(() => {
-        // const dummyData = [
-        //     {
-        //         id: 1,
-        //         name: 'Test Player',
-        //         license: 'license:12345',
-        //         discord: 'discord:67890',
-        //         ip: '127.0.0.1',
-        //         reason: 'Testing',
-        //         expire: 123456789,
-        //         bannedby: 'Admin'
-        //     }
-        // ];
-        // setBans(dummyData);
         fetchBans()
     }, [])
 

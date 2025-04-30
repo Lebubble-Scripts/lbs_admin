@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { fetchNui } from '../utils/fetchNui';
+import CustomDropdown from './CustomDropdown';
 
 
 type Vec3 = {
@@ -15,8 +16,14 @@ type Vec4 = {
     w: number;
 }
 
+type Vehicles = {
+    model: number;
+    name: string;
+}
+
 
 export default function AdminOptions() {
+    const [vehicles, setVehicles] = useState<Vehicles[]>([])
 
     const handleKeyboardCopy = (text: string) => {
         //keep this as a fallback just incase it doesn't get copied to the clipboard.
@@ -34,7 +41,6 @@ export default function AdminOptions() {
         document.body.removeChild(textarea)
         
     }
-
     const handleGetVec3Coords = () => {
         fetchNui<Vec3>('get_vec3')
         .then(coords => {
@@ -52,7 +58,6 @@ export default function AdminOptions() {
     const handleTeleportWaypoint = () => {
         fetchNui('teleport_to_marker')
     }
-
     const handleGetHeading = () => {
         fetchNui<{heading: number}>('get_heading')
         .then(res => {
@@ -60,18 +65,30 @@ export default function AdminOptions() {
             handleKeyboardCopy(headingString)
         })
     }
-
     const handleHealAction = () => {
         fetchNui('heal_self')
     }
-
     const handleReviveAction = () => {
         fetchNui('revive_self')
     }
+    const handleVehicleSelect = (model: number) => {
+        fetchNui
+    };
+
+    useEffect(() => {
+        fetchNui<Vehicles[]>('getVehiclesList')
+        .then((data) => {
+            setVehicles(data);
+        })
+        .catch((e) => {
+            console.error('Error retrieving vehicles list', e)
+        })
+    }, [])
 
     return (
         <div className='admin-options'>
-            <div className='buttons'>
+            <div className='admin-content'>
+                {/* <img src='./assets/images/LOGOSYNCRP.png' alt='Server Logo Image'></img> */}
                 <h3>Admin</h3>
                 <button onClick={handleHealAction}>
                     Heal Self
@@ -82,6 +99,21 @@ export default function AdminOptions() {
                 <button onClick={handleReviveAction}>
                     Revive Self
                 </button>
+                <div className='vehicle-spawn-container'>
+                <CustomDropdown
+                        options={[
+                            ...new Map(
+                                vehicles.map((vehicle) => [vehicle.model, vehicle])
+                            ).values(),
+                        ].map((vehicle) => ({
+                            value: vehicle.model,
+                            label: vehicle.name 
+                        }))
+                        }
+                        onSelect={handleVehicleSelect}
+                        placeholder="Select a vehicle"
+                    />
+                </div>
                 <h3>Dev</h3>
                 <button onClick={handleGetVec3Coords}>Copy vec3 coords</button>
                 <button onClick={handleGetVec4Coords}>Copy vec4 coords</button>
