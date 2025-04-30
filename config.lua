@@ -28,3 +28,4 @@ Config.DiscordWebhook = "https://discord.com/api/webhooks/1360063633295675392/s4
 -- qb = QBCore 
 -- qbx = Qbox
 Config.BanProvider = "ws"
+

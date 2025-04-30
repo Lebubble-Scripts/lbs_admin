@@ -3,6 +3,7 @@
 --------------------
 local isSpectating = false
 local lastSpectateCoord = nil
+local imgurClientId = Config.ImgurAPIClientKey
 --------------------
 -- Functions
 --------------------
@@ -15,6 +16,7 @@ local function toggleNuiReportsFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
   SendReactMessage('reportMenu', shouldShow)
 end
+
 --------------------
 -- Commands
 --------------------
@@ -46,6 +48,7 @@ RegisterCommand('reportmenu', function()
     end
   end, true)
 end, false)
+
 -------------------
 -- Key Mappings
 -------------------
