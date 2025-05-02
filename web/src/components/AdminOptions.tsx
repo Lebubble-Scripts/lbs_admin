@@ -24,6 +24,25 @@ type Vehicles = {
 
 export default function AdminOptions() {
     const [vehicles, setVehicles] = useState<Vehicles[]>([])
+    const [selectedVehicle, setSelectedVehicle] = useState<number | null>(null)
+
+    const handleVehicleSelect = (model: number) => {
+        setSelectedVehicle(model)
+    }
+
+
+    const handleVehicleSpawn = () => {
+        if (selectedVehicle !== null) {
+            console.log('Selected vehicle model:', selectedVehicle);
+            fetchNui('spawnVehicle', {model: selectedVehicle})
+            .then(() => {
+                console.log(`Vehicle with model ${selectedVehicle} sent to lua`)
+            })
+            .catch((e) => {
+                console.error('failed to send data to client', e)
+            })
+        }
+    }
 
     const handleKeyboardCopy = (text: string) => {
         //keep this as a fallback just incase it doesn't get copied to the clipboard.
@@ -71,9 +90,6 @@ export default function AdminOptions() {
     const handleReviveAction = () => {
         fetchNui('revive_self')
     }
-    const handleVehicleSelect = (model: number) => {
-        fetchNui
-    };
 
     useEffect(() => {
         fetchNui<Vehicles[]>('getVehiclesList')
@@ -113,6 +129,7 @@ export default function AdminOptions() {
                         onSelect={handleVehicleSelect}
                         placeholder="Select a vehicle"
                     />
+                    <button onClick={handleVehicleSpawn}>Spawn</button>
                 </div>
                 <h3>Dev</h3>
                 <button onClick={handleGetVec3Coords}>Copy vec3 coords</button>
