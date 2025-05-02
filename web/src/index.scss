@@ -52,6 +52,7 @@ button {
   border: 0;
   &:hover {
     background-color: $hover_color;
+    transform: translateY(-5px);
     box-shadow: $hover_color 0 10px 15px -2px;
     transition: 0.2s;
   }
