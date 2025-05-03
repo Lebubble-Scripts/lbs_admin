@@ -26,11 +26,14 @@ export default function PlayerActionModal({
     const [showBanModal, setShowBanModal] = useState(false)
     const [showKickModal, setShowKickModal] = useState(false)
     const [showWarnModal, setShowWarnModal] = useState(false)
-    
+    const [isExpanded, setIsExpanded] = useState(false)
+
+        
     if (!opened) return null;
 
     const handleAction = (action: string) => {
         if (action === 'ban'){
+            setIsExpanded(true)
             setShowBanModal(true)
             setShowWarnModal(false)
             setShowKickModal(false)
@@ -63,9 +66,10 @@ export default function PlayerActionModal({
         setShowKickModal(false)
     }
 
+
     return (
         <div className='modal-overlay'>
-            <div className="modal-content">
+            <div className={`modal-content ${isExpanded ? 'expanded' : 'collapsed'}`}>
                 <div className="modal-header">
                 <h3>Actions for {player.name}</h3>
                 </div>
@@ -103,7 +107,12 @@ export default function PlayerActionModal({
                             playerId={player.id}
                             playerName={player.name}
                             onConfirm={handleBanConfirm}
-                            onCancel={() => setShowBanModal(false)}
+                            onCancel={() => {
+                                setIsExpanded(false);
+                                setTimeout(()=> {
+                                    setShowBanModal(false)
+                                },300)
+                            }}
                         />
                     )
                 }
