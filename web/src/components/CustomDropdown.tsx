@@ -18,6 +18,21 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState<Option | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false)
+
+    const handleDropdown = () => {
+        //timeout added for fade out animation.
+        if (isOpen) {
+            setIsExpanded(false)
+            setTimeout(()=> {
+                setIsOpen(false)
+            },300)
+        }
+        else {
+            setIsExpanded(true)
+            setIsOpen(true)
+        }
+    }
 
     const handleSelect = (option: Option) => {
         setSelected(option);
@@ -26,26 +41,28 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     };
 
     return (
-        <div className="custom-dropdown">
+        <div className='custom-dropdown'>
             <div
                 className="dropdown-header"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={handleDropdown}
             >
                 {selected ? selected.label : placeholder}
             </div>
-            {isOpen && (
-                <ul className="dropdown-list">
-                    {options.map((option) => (
-                        <li
-                            key={option.value}
-                            className="dropdown-item"
-                            onClick={() => handleSelect(option)}
-                        >
-                            {option.label}
-                        </li>
-                    ))}
-                </ul>
-            )}
+            <div className={`dropdown ${isExpanded ? 'dropdown-open' : 'dropdown-closed'}`}>
+                {isOpen && (
+                    <ul className='dropdown-list'>
+                        {options.map((option) => (
+                            <li
+                                key={option.value}
+                                className="dropdown-item"
+                                onClick={() => handleSelect(option)}
+                            >
+                                {option.label}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
     );
 };

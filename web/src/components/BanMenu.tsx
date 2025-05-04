@@ -4,7 +4,7 @@ import { fetchNui } from '../utils/fetchNui'
 import BanActionModal from './BanActionModal';
 
 interface Bans {
-    id: number,
+    id: string,
     name: string,
     license: string,
     discord: string,
@@ -15,7 +15,7 @@ interface Bans {
 }
 
 type Ban = {
-    id: number,
+    id: string,
     name: string,
     license: string,
     discord: string,
@@ -45,7 +45,12 @@ export default function AdminReportMenu() {
     const fetchBans= () => {
         fetchNui<Bans[]>('getBansList')
         .then((data) => {
-            setBans(data)
+            if (!data){
+                setBans([])
+            }
+            else {
+                setBans(data)
+            }
         })
         .catch((e) => {
             console.error("Error retrieving bans list ", e)

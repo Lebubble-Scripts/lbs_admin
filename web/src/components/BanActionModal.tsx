@@ -1,6 +1,7 @@
+import { fetchNui } from "../utils/fetchNui"
 
 interface Ban {
-    id: number,
+    id: string,
     name: string,
     license: string,
     discord: string,
@@ -26,6 +27,13 @@ export default function BanActionModal({
 }:BanActionModalProps){
     if (!opened) return null;
 
+    const handleUnban = (banId: string) => {
+        const payload = {
+            id: banId
+        }
+        fetchNui('unbanPlayer', payload)
+        onClose?.()
+    }
     
 
     return (
@@ -44,6 +52,10 @@ export default function BanActionModal({
                 <p>Expires | {ban.expire ? new Date(ban.expire).toLocaleString() : 'Permanent'}</p>
                 <p>Banned by | {ban.bannedby}</p>
             </div>
+
+            <button className='button-unban' onClick={() => handleUnban(ban.id)}>
+                Unban
+            </button>
 
             <button className="close-modal" onClick={onClose}>
                 <i className="fa-solid fa-xmark"></i>

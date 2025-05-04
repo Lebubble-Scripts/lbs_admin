@@ -34,7 +34,7 @@ export default function ReportActionModal({
 
 
     return (
-        <div className='modal-overlay'>
+        <div className='modal-overlay reports'>
             <div className="modal-content">
                 <div className="modal-header">
                     <h3>Actions for {report.name}'s report</h3>
@@ -48,12 +48,19 @@ export default function ReportActionModal({
                     <button onClick={() => handlePlayerAction('teleport')} className="action-button teleport">
                         <i className="fa-solid fa-location-arrow"></i> Teleport
                     </button>
+                    <button onClick={() => handlePlayerAction('bring')} className="action-button bring">
+                        <i className="fa-solid fa-arrow-down"></i> Bring
+                    </button>
+                    <button onClick={() => handlePlayerAction('spectate')} className="action-button spectate">
+                        <i className="fa-solid fa-eye"></i> Spectate
+                    </button>
                 </div>
                 <div className='report-action'>
                     <h4>Report Action</h4>
                     <button onClick={handleCloseTicket} className='action-button close'>
                         Close Report
                     </button>
+                    
                 </div>
                 <div className='report-status'>
                     <h4>{report.status}</h4>

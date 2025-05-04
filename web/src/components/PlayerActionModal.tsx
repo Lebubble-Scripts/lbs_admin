@@ -28,9 +28,10 @@ export default function PlayerActionModal({
     const [showWarnModal, setShowWarnModal] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
 
+    
         
     if (!opened) return null;
-
+    
     const handleAction = (action: string) => {
         if (action === 'ban'){
             setIsExpanded(true)
@@ -77,7 +78,15 @@ export default function PlayerActionModal({
                     <p>Player ID: {player.id}</p>
                     <p>Name: {player.name}</p>
                 </div>
-                <div className="action-buttons">
+                <div
+                    className="action-buttons"
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        gap: ".3vh",
+                        alignContent:'center',
+                    }}
+                >
                     <button onClick={() => handleAction('kick')} className="action-button kick">
                         <i className="fa-solid fa-exclamation"></i> Kick Player
                     </button>
@@ -93,9 +102,6 @@ export default function PlayerActionModal({
                     <button onClick={() => handleAction('bring')} className="action-button bring">
                         <i className="fa-solid fa-arrow-down"></i> Bring
                     </button>
-                    {/* <button onClick={() => handleAction('warn')} className="action-button warn">
-                        <i className="fa-solid fa-triangle-exclamation"></i> Warn
-                    </button> */}
                     
                     <button onClick={() => handleAction('spectate')} className="action-button spectate">
                         <i className="fa-solid fa-eye"></i> Spectate

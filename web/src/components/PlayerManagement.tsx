@@ -25,18 +25,18 @@ const mockPlayers: Player[] = [
 
 export default function PlayerManagement() {
     // FOR BROWSER DEVELOPMENT === CHANGE [] to mockPlayers
-    const [players, setPlayers] = useState<Player[]>(mockPlayers);
+    const [players, setPlayers] = useState<Player[]>([]);
 
     useEffect(() => {
-        // FOR BROWSER DEVELOPMENT === COMMENT OUT FETCH CALL BELOW
-        // fetchNui<Player[]>('getPlayerList')
-        //   .then((data) => {
-        //     setPlayers(data);
-        //   })
-        //   .catch((e) => {
-        //     console.error('Error retrieving player list', e);
-        //     setPlayers([]);
-        //   });
+        //FOR BROWSER DEVELOPMENT === COMMENT OUT FETCH CALL BELOW
+        fetchNui<Player[]>('getPlayerList')
+          .then((data) => {
+            setPlayers(data);
+          })
+          .catch((e) => {
+            console.error('Error retrieving player list', e);
+            setPlayers([]);
+          });
     }, []);
 
     // Handle action on server
