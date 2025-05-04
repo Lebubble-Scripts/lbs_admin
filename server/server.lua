@@ -96,6 +96,50 @@ function getIdentifier(source, idtype)
     return GetPlayerIdentifierByType(source, idtype or 'license')
 end
 
+local function deleteBanRecord(identifier)
+    print("Attempting to remove ban for identifier: " .. identifier)
+
+    local resourceName = GetCurrentResourceName()
+    local filePath = 'bans.json'
+    local fileContent = LoadResourceFile(resourceName, filePath)
+
+    if not fileContent or fileContent == "" then
+        print("[ERROR] bans.json is empty or could not be read.")
+        return
+    end
+
+
+    local success, jsonTable = pcall(function() return json.decode(fileContent) end)
+    if not success or type(jsonTable) ~= "table" then
+        print("[ERROR] Failed to parse bans.json. Invalid JSON structure.")
+        return
+    end
+
+    for key, value in pairs(jsonTable) do
+        print("Key: " .. key .. ", Value: " .. (type(value) == "table" and "Table" or tostring(value)))
+    end
+
+    if jsonTable[identifier] then
+        jsonTable[identifier] = nil
+        print("[DEBUG] Removed entry for identifier: " .. identifier)
+    else
+        print("[ERROR] Identifier '" .. identifier .. "' not found in bans.json.")
+        return
+    end
+
+    local reconstructedContent = "{\n"
+    for key, value in pairs(jsonTable) do
+        reconstructedContent = reconstructedContent .. string.format('    "%s": %s,\n', key, json.encode(value))
+    end
+
+    if reconstructedContent:sub(-2) == ",\n" then
+        reconstructedContent = reconstructedContent:sub(1, -3) .. "\n"
+    end
+    reconstructedContent = reconstructedContent .. "}"
+
+    SaveResourceFile(resourceName, filePath, reconstructedContent, -1)
+    return true
+end
 ------------------------------
 --CALLBACKS
 ------------------------------
@@ -282,10 +326,17 @@ RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
                 {query = 'DELETE FROM `reports` WHERE reporter_id = ?', values= {target}}
             }
             MySQL.transaction.await(queries)
+            print('attempting to remove data')
 
             TriggerClientEvent('ox_lib:notify', src, {
-                title='Closed',
-                description='Ticket closed',
+                title='Ticket Closed',
+                description='Successfully closed ticket',
+                type='success'
+            })
+
+            TriggerClientEvent('ox_lib:notify', target, {
+                title='Ticket Closed',
+                description="Your ticket was closed by " .. GetPlayerName(src),
                 type='success'
             })
         end
@@ -375,4 +426,8 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
     })
 end)
 
+RegisterNetEvent('lbs_admin:server:unbanPlayer', function(banId)
+    if not banId then return end
+    deleteBanRecord(banId)
+end)
 

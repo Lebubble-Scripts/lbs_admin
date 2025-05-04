@@ -32,8 +32,6 @@ A basic guide to install the lbs_admin_react resource via Keymaster.
     ensure lbs_admin_react
     ```
 
-
-
 ## Usage
 
 `[Commands]`
@@ -54,6 +52,10 @@ Admin will be able to see the reports in their `F3` admin menu. From there, admi
 
 All tickets are stored in the database to ensure they survive server restarts. 
 
+## Bans 
+
+LBS Admin integrates with WaveShield and QBCore bans. Allowing you to see the bans on your server and unban players with ease. 
+
 ## Configuration
 
 Customize the resource by editing ```config.lua```.
@@ -71,7 +73,7 @@ Config.DiscordLink = 'https://discord.gg/CUX8hVnswZ'
 -- Set Framework Here  
 -- qb = qb-core 
 -- qbx = QBox
-Config.Framework = 'qb'
+Config.Framework = ''
 
 -- Set Discord Webhook to the channel you want the admin actions to be logged to (recommended this is a private and restricted channel)
 Config.DiscordWebhook = ""
@@ -86,7 +88,7 @@ Config.DiscordWebhook = ""
 -- ws = WaveShield 
 -- qb = QBCore 
 -- qbx = Qbox
-Config.BanProvider = "ws"
+Config.BanProvider = ""
 ```
 
 After updating the configuration, restart lbs_admin_react apply the changes.

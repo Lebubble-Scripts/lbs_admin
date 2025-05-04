@@ -12,7 +12,7 @@ Config.DiscordLink = 'https://discord.gg/CUX8hVnswZ'
 -- Set Framework Here  
 -- qb = qb-core 
 -- qbx = QBox
-Config.Framework = 'qb'
+Config.Framework = ''
 
 -- Set Discord Webhook to the channel you want the admin actions to be logged to (recommended this is a private and restricted channel)
 Config.DiscordWebhook = ""
@@ -27,5 +27,5 @@ Config.DiscordWebhook = ""
 -- ws = WaveShield 
 -- qb = QBCore 
 -- qbx = Qbox
-Config.BanProvider = "ws"
+Config.BanProvider = ""
 
