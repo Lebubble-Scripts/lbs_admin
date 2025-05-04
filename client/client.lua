@@ -100,6 +100,11 @@ end)
 --CALLBACKS
 --------------------
 
+RegisterNUICallback('unbanPlayer', function(data, cb)
+  local banId = data.id
+  TriggerServerEvent('lbs_admin:server:unbanPlayer', banId)
+end)
+
 RegisterNUICallback('hideAdminMenu', function(_, cb)
   toggleNuiFrame(false)
   debugPrint('Hide NUI frame')
@@ -113,6 +118,43 @@ RegisterNUICallback('hideReportMenu', function(_, cb)
 
 end)
 
+RegisterNUICallback('spawnVehicle', function(data, cb)
+    local model = data.model
+    if not model then return end
+
+    if not IsModelInCdimage(model) or not IsModelAVehicle(model) then 
+      print('Invalid vehicle model', model)
+    end
+
+    RequestModel(model)
+    while not HasModelLoaded(model) do
+      Wait(0)
+    end
+
+    local playerPed = PlayerPedId()
+    local playerCoords = GetEntityCoords(playerPed)
+
+    if IsPedInAnyVehicle(playerPed, true) then 
+      DeleteEntity(GetVehiclePedIsIn(playerPed, false))
+    end
+    
+    local vehicle = CreateVehicle(model, playerCoords.x, playerCoords.y, playerCoords.z, GetEntityHeading(playerPed), true, false)
+
+    TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
+
+    SetModelAsNoLongerNeeded(model)
+
+    toggleNuiFrame(false)
+    
+
+    TriggerEvent('ox_lib:notify', {
+      title='Vehicle Spawned',
+      decsription='Vehicle has been spawned!',
+      type='success'
+    })
+
+    cb({})
+end)
 
 RegisterNUICallback('getPlayerList', function(_, cb)
   lib.callback('lbs_admin:server:getPlayerList', false, function(players)
@@ -142,15 +184,12 @@ end)
 RegisterNUICallback('getVehiclesList', function(_,cb)
     local vehicles = {}
     local vehicleList = GetGamePool('CVehicle')
-    print("Vehicle List:", vehicleList)
-    print("Number of Vehicles:", #vehicleList)
 
     for i = 1, #vehicleList do
         local vehicleModel = GetEntityModel(vehicleList[i])
         print("Vehicle Entity:", vehicleList[i], "Model:", vehicleModel)
         if vehicleModel then
             local vehicleName = GetDisplayNameFromVehicleModel(vehicleModel)
-            print("Vehicle Name:", vehicleName)
             table.insert(vehicles, {
                 model = vehicleModel,
                 name = vehicleName
