@@ -1,26 +1,3 @@
-if Config.EnableDebugMode then
-    print("[DEBUG] server/server.lua loaded")
-    if Config.Framework == 'qb' then
-        print('[DEBUG] QBCore Detected')
-    elseif Config.Framework == 'qbx' then 
-        print('[DEBUG] QBox Detected')
-    else
-        print('[DEBUG] No Framework Detected')
-    end
-end
-
--- local json = require('json')
-
--- local QBCore = nil
-
-if Config.Framework == 'qb' or Config.Framework == 'qbx' then 
-    QBCore = exports['qb-core']:GetCoreObject()
-else
-    print('[ERROR] NO FRAMEWORK DETECTED')
-end
-
-
-
 
 ------------------------------
 -- FUNCTIONS
@@ -153,7 +130,7 @@ end)
 lib.callback.register('lbs_admin:server:getPlayerList', function()
     local players = {}
     if Config.Framework == 'qb' then 
-        for _, player in pairs(QBCore.Functions.GetQBPlayers()) do
+        for _, player in pairs(GetPlayers()) do
             if Config.EnableDebugMode then
                 print(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
             end
@@ -238,13 +215,12 @@ lib.callback.register('lbs_admin:server:getBansList', function()
             end
         end
     elseif Config.BanProvider == 'ws' then
-        print('trying waveshiled')
         local resourceName = GetCurrentResourceName()
         local filePath = GetResourcePath(resourceName) .. '/bans.json' 
 
         local file = io.open(filePath, 'r')
         if not file then
-            print('Failed to find bans.json')
+            print('[ERROR] Failed to find bans.json')
             return
         end
 
@@ -255,25 +231,20 @@ lib.callback.register('lbs_admin:server:getBansList', function()
         
         local response = json.decode(fileContent)
         if not response then 
-            print('Failed to parse bans.json')
+            print('[ERROR] Failed to parse bans.json')
             return
         end
 
         if response == nil then
-            print('Bans is nil')
+            print('[ERROR] Bans is nil')
             return
         elseif next(response) == nil then
-            print('Bans is an empty table')
+            print('[ERROR] Bans is an empty table')
             return
         end
         
 
         for key, ban in pairs(response) do
-            print('printing ban')
-            print('Key:', key) -- This is the unique ban ID (e.g., "waveshield_ban_529708")
-            print('Ban Data:', ban)
-        
-            -- Extract identifiers
             local license = nil
             local discord = nil
             local ip = nil
@@ -293,11 +264,9 @@ lib.callback.register('lbs_admin:server:getBansList', function()
             print(license)
             print(discord)
             print(ip)
-            
-        
-            -- Insert the ban into the table
+
             table.insert(bans, {
-                id = key, -- Use the key as the unique ban ID
+                id = key, 
                 name = ban.name or "Unknown",
                 license = license or "N/A",
                 discord = discord or "N/A",
@@ -424,10 +393,12 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
         description = 'Report successfully submitted!',
         type='success'
     })
+    send_to_discord_log("Report Submitted", ("%s [%s] submitted a report with message: \n  %s"):format(GetPlayerName(source),source,message), 255)
 end)
 
 RegisterNetEvent('lbs_admin:server:unbanPlayer', function(banId)
     if not banId then return end
     deleteBanRecord(banId)
+    local admin = GetPlayerName(source)
+    send_to_discord_log("Unban Action", ("%s [%s] unbanned ban ID: %s "):format(admin,source,banId), 255)
 end)
-
