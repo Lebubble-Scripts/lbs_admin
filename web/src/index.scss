@@ -63,6 +63,7 @@ button {
   word-break: break-word;
   margin: 15px;
   border: 0;
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: $hover_color;
@@ -70,6 +71,8 @@ button {
     box-shadow: $hover_color 0 10px 15px -2px;
     transition: 0.2s;
   }
+
+
 }
 
 .close-menu {
@@ -125,7 +128,7 @@ button {
     border-bottom: 3px solid rgba(0, 0, 0, 0.25);
     cursor: pointer;
     position: relative;
-    transition: border-bottom 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 
     &:hover {
       background-color: $hover_color;

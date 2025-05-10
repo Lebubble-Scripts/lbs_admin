@@ -3,9 +3,6 @@ Config = {}
 -- Set to True to enable debug mode
 Config.EnableDebugMode = true
 
--- Server group required to access admin menu 
-Config.AdminGroup = 'admin'
-
 -- Link to your discord for Ban/Kick Messages
 Config.DiscordLink = 'https://discord.gg/CUX8hVnswZ'
 
