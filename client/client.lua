@@ -4,17 +4,18 @@
 local isSpectating = false
 local lastSpectateCoord = nil
 local imgurClientId = Config.ImgurAPIClientKey
+local utils = require('shared/utils')
 --------------------
 -- Functions
 --------------------
 local function toggleNuiFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
-  SendReactMessage('setVisible', shouldShow)
+  utils.SendReactMessage('setVisible', shouldShow)
 end
 
 local function toggleNuiReportsFrame(shouldShow)
   SetNuiFocus(shouldShow, shouldShow)
-  SendReactMessage('reportMenu', shouldShow)
+  utils.SendReactMessage('reportMenu', shouldShow)
 end
 
 --------------------
@@ -187,7 +188,6 @@ RegisterNUICallback('getVehiclesList', function(_,cb)
 
     for i = 1, #vehicleList do
         local vehicleModel = GetEntityModel(vehicleList[i])
-        print("Vehicle Entity:", vehicleList[i], "Model:", vehicleModel)
         if vehicleModel then
             local vehicleName = GetDisplayNameFromVehicleModel(vehicleModel)
             table.insert(vehicles, {

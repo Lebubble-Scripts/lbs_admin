@@ -1,22 +1,14 @@
-if Config.EnableDebugMode then
-    print("[DEBUG] server/server.lua loaded")
-    if Config.Framework == 'qb' then
-        print('[DEBUG] QBCore Detected')
-    elseif Config.Framework == 'qbx' then 
-        print('[DEBUG] QBox Detected')
-    else
-        print('[DEBUG] No Framework Detected')
-    end
-end
+local QBCore = nil;
+local playerRoles = {}
+local utils = require('shared/utils')
 
--- local json = require('json')
-
--- local QBCore = nil
-
-if Config.Framework == 'qb' or Config.Framework == 'qbx' then 
-    QBCore = exports['qb-core']:GetCoreObject()
-else
-    print('[ERROR] NO FRAMEWORK DETECTED')
+if Config.Framework == 'qbx' then
+    print('[LBS_ADMIN] Qbox detected')
+elseif Config.Framework == 'qb' then
+    QBCore = exports['qb-core']:GetCoreObject();
+    print('[LBS_ADMIN] QBCore detected')
+else   
+    print('^1[LBS_ADMIN] No supported framework detected. Ensure qbox or qbcore is running.^7')
 end
 
 
@@ -25,16 +17,13 @@ end
 ------------------------------
 -- FUNCTIONS
 ------------------------------
-
 function send_to_discord_log(title, description, color)
     local webhook = Config.DiscordWebhook
-    if (not webhook or webhook == '') and Config.EnableDebugMode then 
-        print("[Discord Log] No webhook URL set!")
+    if (not webhook or webhook == '') then 
+        utils.debugPrint("[Discord Log] No webhook URL set!")
         return 
     end
-    if Config.EnableDebugMode then 
-        print("[Discord Log] Sending to Discord:", title, description)
-    end 
+    utils.debugPrint("[Discord Log] Sending to Discord:", title, description)
 
     local embed = {
         {
@@ -57,11 +46,12 @@ function send_to_discord_log(title, description, color)
 
 end
 
-
 local function hasAdminPermissions(src)
-    local admin_role = Config.AdminGroup
-    local admin_status = IsPlayerAceAllowed(src, admin_role)
-    return admin_status or IsPlayerAceAllowed(src, 'command')
+    return IsPlayerAceAllowed(src, 'command')
+end
+
+local function hasPermission(src, perm)
+    return IsPlayerAceAllowed(src, perm) or IsPlayerAceAllowed(src, 'command')
 end
 
 local function getBanReason(reason, duration, durationUnit)
@@ -115,13 +105,12 @@ local function deleteBanRecord(identifier)
         return
     end
 
-    for key, value in pairs(jsonTable) do
-        print("Key: " .. key .. ", Value: " .. (type(value) == "table" and "Table" or tostring(value)))
-    end
 
     if jsonTable[identifier] then
         jsonTable[identifier] = nil
-        print("[DEBUG] Removed entry for identifier: " .. identifier)
+        if Config.EnableDebugMode then
+            print("[DEBUG] Removed entry for identifier: " .. identifier)
+        end
     else
         print("[ERROR] Identifier '" .. identifier .. "' not found in bans.json.")
         return
@@ -140,44 +129,36 @@ local function deleteBanRecord(identifier)
     SaveResourceFile(resourceName, filePath, reconstructedContent, -1)
     return true
 end
+
+
 ------------------------------
 --CALLBACKS
 ------------------------------
 lib.callback.register('lbs_admin:server:check_permissions', function(src)
-    local admin_role = Config.AdminGroup
-    local admin_status = IsPlayerAceAllowed(src, admin_role)
-    --should double check if they have command access ~_~
-    return admin_status or IsPlayerAceAllowed(src, 'command')
+    return IsPlayerAceAllowed(src, 'command')
 end)
 
 lib.callback.register('lbs_admin:server:getPlayerList', function()
     local players = {}
     if Config.Framework == 'qb' then 
         for _, player in pairs(QBCore.Functions.GetQBPlayers()) do
-            if Config.EnableDebugMode then
-                print(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
-            end
+            utils.debugPrint(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
             table.insert(players, {
                 id = player.PlayerData.source,
                 name = player.PlayerData.name or 'Unknown'
             })
         end
-        if Config.EnableDebugMode then
-            print('[DEBUG] Sending player list with ' .. #players .. ' players')
-        end
+        utils.debugPrint('[DEBUG] Sending player list with ' .. #players .. ' players')
     elseif Config.Framework == 'qbx' then
         for _, player in pairs(exports.qbx_core:GetQBPlayers()) do
-            if Config.EnableDebugMode then
-                print(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
-            end
+            utils.debugPrint(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
             table.insert(players, {
                 id = player.PlayerData.source, 
                 name = player.PlayerData.name or 'Unknown'
             })
         end
-        if Config.EnableDebugMode then
-            print('[DEBUG] Sending player list with ' .. #players .. ' players')
-        end
+        utils.debugPrint('[DEBUG] Sending player list with ' .. #players .. ' players')
+
     else 
         print('No Framework Found!')
     end
@@ -210,6 +191,8 @@ lib.callback.register('lbs_admin:server:getReportList', function()
                 status = row.status
             })
         end
+    else
+        utils.debugPrint('[DEBUG] Failed to query reports table in database')
     end
 
 
@@ -238,13 +221,12 @@ lib.callback.register('lbs_admin:server:getBansList', function()
             end
         end
     elseif Config.BanProvider == 'ws' then
-        print('trying waveshiled')
         local resourceName = GetCurrentResourceName()
         local filePath = GetResourcePath(resourceName) .. '/bans.json' 
 
         local file = io.open(filePath, 'r')
         if not file then
-            print('Failed to find bans.json')
+            print('[ERROR] Failed to find bans.json')
             return
         end
 
@@ -255,25 +237,20 @@ lib.callback.register('lbs_admin:server:getBansList', function()
         
         local response = json.decode(fileContent)
         if not response then 
-            print('Failed to parse bans.json')
+            print('[ERROR] Failed to parse bans.json')
             return
         end
 
         if response == nil then
-            print('Bans is nil')
+            print('[ERROR] Bans is nil')
             return
         elseif next(response) == nil then
-            print('Bans is an empty table')
+            print('[ERROR] Bans is an empty table')
             return
         end
         
 
         for key, ban in pairs(response) do
-            print('printing ban')
-            print('Key:', key) -- This is the unique ban ID (e.g., "waveshield_ban_529708")
-            print('Ban Data:', ban)
-        
-            -- Extract identifiers
             local license = nil
             local discord = nil
             local ip = nil
@@ -293,11 +270,9 @@ lib.callback.register('lbs_admin:server:getBansList', function()
             print(license)
             print(discord)
             print(ip)
-            
-        
-            -- Insert the ban into the table
+
             table.insert(bans, {
-                id = key, -- Use the key as the unique ban ID
+                id = key, 
                 name = ban.name or "Unknown",
                 license = license or "N/A",
                 discord = discord or "N/A",
@@ -310,7 +285,6 @@ lib.callback.register('lbs_admin:server:getBansList', function()
     end
     return bans
 end)
-
 ------------------------------
 --Events
 ------------------------------
@@ -320,8 +294,7 @@ RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
     local src = source
     if not target then return end
     if action == 'close' then
-        if hasAdminPermissions(src) then
-
+        if hasPermission(src, 'reports') then
             local queries = {
                 {query = 'DELETE FROM `reports` WHERE reporter_id = ?', values= {target}}
             }
@@ -355,7 +328,7 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     -- BAN ACTION
     if action == 'ban' then
         --log to discord
-        if hasAdminPermissions(source) then
+        if hasPermission(source, 'ban') then
             reason, banTime = getBanReason(reason, duration, durationUnit)
             send_to_discord_log("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,source,player,target,reason), 255)
             MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?,?,?,?,?,?,?)',{
@@ -370,17 +343,21 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             DropPlayer(target, reason)
         end
     elseif action == 'teleport' then
-        local src = source 
-        local coords = GetEntityCoords(GetPlayerPed(target))
-        send_to_discord_log("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
-        TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
+        if hasPermission(source, 'teleport') then 
+            local src = source 
+            local coords = GetEntityCoords(GetPlayerPed(target))
+            send_to_discord_log("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
+            TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
+        end
     elseif action == 'bring' then
-        local src = source
-        local coords = GetEntityCoords(GetPlayerPed(src))
-        send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
-        TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
+        if hasPermission(source, 'teleport') then 
+            local src = source
+            local coords = GetEntityCoords(GetPlayerPed(src))
+            send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
+            TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
+        end
     elseif action == 'spectate' then
-        if hasAdminPermissions(source) then
+        if hasPermission(source, 'spectate') then
             if source == target then 
                 TriggerClientEvent('ox_lib:notify', source , {
                     title = 'Error',
@@ -395,7 +372,7 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
         end
     elseif action == 'kick' then
-        if hasAdminPermissions(source) then
+        if hasPermission(source, 'kick') then
             send_to_discord_log("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,source,player,target, reason), 16711680)
             local discordLink = Config.DiscordLink
             DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
@@ -403,12 +380,13 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     end
 end)
 
-
 RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local src = source
-    if Config.Framework == 'qb' or Config.Framework == 'qbx' then
-        TriggerClientEvent('QBCore:Command:GoToMarker', src)
-        send_to_discord_log("TPM Action", ("%s [%s] teleport to marker"):format(admin,source), 255)
+    if hasPermission(src, 'teleport') then
+        if Config.Framework == 'qb' or Config.Framework == 'qbx' then
+            TriggerClientEvent('QBCore:Command:GoToMarker', src)
+            send_to_discord_log("TPM Action", ("%s [%s] teleport to marker"):format(admin,source), 255)
+        end
     end
 end)
 
@@ -424,10 +402,14 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
         description = 'Report successfully submitted!',
         type='success'
     })
+    send_to_discord_log("Report Submitted", ("%s [%s] submitted a report with message: \n  %s"):format(GetPlayerName(source),source,message), 255)
 end)
 
 RegisterNetEvent('lbs_admin:server:unbanPlayer', function(banId)
-    if not banId then return end
-    deleteBanRecord(banId)
+    if hasPermission(source, 'ban') then 
+        if not banId then return end
+        deleteBanRecord(banId)
+        local admin = GetPlayerName(source)
+        send_to_discord_log("Unban Action", ("%s [%s] unbanned ban ID: %s "):format(admin,source,banId), 255)
+    end
 end)
-

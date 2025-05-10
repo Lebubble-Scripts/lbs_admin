@@ -12,7 +12,8 @@ ui_page 'web/build/index.html'
 
 shared_script  {
   'config.lua',
-  '@ox_lib/init.lua'
+  '@ox_lib/init.lua',
+  'shared/utils.lua'
 }
 
 dependencies {
@@ -20,7 +21,9 @@ dependencies {
   'oxmysql'
 }
 
-client_script "client/**/*"
+client_scripts  {
+  'client/client.lua'
+}
 
 server_scripts {
   '@oxmysql/lib/MySQL.lua',
