@@ -219,8 +219,7 @@ RegisterNUICallback('hideReportMenu', function(_, cb)
 end)
 
 RegisterNUICallback('spawnVehicle', function(data, cb)
-    TriggerServerEvent('lbs_admin:server:checkAdminStatus', function(isAdmin)
-      if isAdmin then 
+    
         local model = data.model
         if not model then return end
 
@@ -254,15 +253,6 @@ RegisterNUICallback('spawnVehicle', function(data, cb)
           decsription='Vehicle has been spawned!',
           type='success'
         })
-      else
-        TriggerEvent('ox_lib:notify', {
-          title = 'LBS Admin',
-          description = 'You do not have permissions to spawn vehicles',
-          type='error'
-        })
-
-      end
-    end)
     cb({})
 end)
 

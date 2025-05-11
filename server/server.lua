@@ -167,7 +167,13 @@ end
 lib.callback.register('lbs_admin:server:checkAdminStatus', function(src)
     local permissions, group = hasPermission(src)
 
-    if permissions then return true else return false end
+    print('checking permissions server side')
+    print(permissions)
+
+    if not permissions then 
+        print('failed permission check')
+        return false end 
+    return true
 end)
 
 lib.callback.register('lbs_admin:server:getPlayerList', function()
