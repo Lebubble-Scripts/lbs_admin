@@ -400,6 +400,12 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
                 GetPlayerName(src)
             })
             DropPlayer(target, reason)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='LBS Admin',
+                description = 'You do not have permissions to ' .. action,
+                type='error'
+            })
         end
     elseif action == 'teleport' then
         if permissions['teleport'] then 
@@ -409,7 +415,7 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         else
             TriggerClientEvent('ox_lib:notify', src, {
                 title='LBS Admin',
-                description = 'You do not have permissions to teleport',
+                description = 'You do not have permissions to ' .. action,
                 type='error'
             })
         end
@@ -419,6 +425,12 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             local coords = GetEntityCoords(GetPlayerPed(src))
             sendToDiscordLog("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,src,player,target), 32896)
             TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='LBS Admin',
+                description = 'You do not have permissions to ' .. action,
+                type='error'
+            })
         end
     elseif action == 'spectate' then
         if permissions['spectate'] then
@@ -434,12 +446,24 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             local targetPed = GetPlayerPed(target)
             local coords = GetEntityCoords(targetPed)
             TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='LBS Admin',
+                description = 'You do not have permissions to ' .. action,
+                type='error'
+            })
         end
     elseif action == 'kick' then
         if permissions['kick'] then
             sendToDiscordLog("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,src,player,target, reason), 16711680)
             local discordLink = Config.DiscordLink
             DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='LBS Admin',
+                description = 'You do not have permissions to ' .. action,
+                type='error'
+            })
         end
     end
 end)
@@ -451,6 +475,12 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
         if Config.Framework == 'qb' or Config.Framework == 'qbx' then
             TriggerClientEvent('lbs_admin:client:goToMarker', src)
             sendToDiscordLog("TPM Action", ("%s [%s] teleport to marker"):format(admin,src), 255)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {
+                title='LBS Admin',
+                description = 'You do not have permissions to ' .. action,
+                type='error'
+            })
         end
     end
 end)
@@ -477,5 +507,11 @@ RegisterNetEvent('lbs_admin:server:unbanPlayer', function(banId)
         deleteWSBanRecord(banId)
         local admin = GetPlayerName(source)
         sendToDiscordLog("Unban Action", ("%s [%s] unbanned ban ID: %s "):format(admin,source,banId), 255)
+    else
+        TriggerClientEvent('ox_lib:notify', src, {
+            title='LBS Admin',
+            description = 'You do not have permissions to ' .. action,
+            type='error'
+        })
     end
 end)
