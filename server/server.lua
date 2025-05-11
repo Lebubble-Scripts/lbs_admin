@@ -1,6 +1,8 @@
 local QBCore = nil;
-local playerRoles = {}
+--ensures consistent order of roles. (needs work for dynamic role setup)
+local groupHierarchy = { 'god', 'admin', 'manager', 'helper'}
 local utils = require('shared/utils')
+
 
 if Config.Framework == 'qbx' then
     print('[LBS_ADMIN] Qbox detected')
@@ -10,14 +12,35 @@ elseif Config.Framework == 'qb' then
 else   
     print('^1[LBS_ADMIN] No supported framework detected. Ensure qbox or qbcore is running.^7')
 end
-
-
-
-
 ------------------------------
 -- FUNCTIONS
 ------------------------------
-function send_to_discord_log(title, description, color)
+function resolveGroupPermissions(group)
+    local resolvedPerms = {}
+    --function to process group, this will go through the role and inherited roles and return the distinct
+    --permissions for each role
+    local function processGroup(groupName)
+        local groupData = Config.Groups[groupName]
+        if not groupData then return end
+
+        for _, perm in ipairs(groupData.permissions) do
+            resolvedPerms[perm] = true
+        end
+
+        for _, inheritedGroup in ipairs(groupData.inherits or {}) do
+            processGroup(inheritedGroup)
+        end
+    end
+    
+    processGroup(group)
+    --debug print for resolved permissions.
+    for perm, _ in pairs(resolvedPerms) do
+        utils.debugPrint('Resolved Permission for ' .. source .. ' : ' .. perm)
+    end
+    return resolvedPerms
+end
+
+function sendToDiscordLog(title, description, color)
     local webhook = Config.DiscordWebhook
     if (not webhook or webhook == '') then 
         utils.debugPrint("[Discord Log] No webhook URL set!")
@@ -46,12 +69,23 @@ function send_to_discord_log(title, description, color)
 
 end
 
-local function hasAdminPermissions(src)
-    return IsPlayerAceAllowed(src, 'command')
-end
+local function hasPermission(playerId)
+    local playerGroup = nil;
+    for _, group in ipairs(groupHierarchy) do
+        if IsPlayerAceAllowed(playerId, 'lbs_admin.' .. group) then
+            playerGroup = group
+            print('found player group')
+            print(playerGroup)
+            break
+        end
+    end
 
-local function hasPermission(src, perm)
-    return IsPlayerAceAllowed(src, perm) or IsPlayerAceAllowed(src, 'command')
+    if playerGroup then
+        local permissions = resolveGroupPermissions(playerGroup)
+        return permissions, playerGroup 
+    else
+        return {}, nil
+    end
 end
 
 local function getBanReason(reason, duration, durationUnit)
@@ -86,9 +120,7 @@ function getIdentifier(source, idtype)
     return GetPlayerIdentifierByType(source, idtype or 'license')
 end
 
-local function deleteBanRecord(identifier)
-    print("Attempting to remove ban for identifier: " .. identifier)
-
+local function deleteWSBanRecord(identifier)
     local resourceName = GetCurrentResourceName()
     local filePath = 'bans.json'
     local fileContent = LoadResourceFile(resourceName, filePath)
@@ -134,8 +166,10 @@ end
 ------------------------------
 --CALLBACKS
 ------------------------------
-lib.callback.register('lbs_admin:server:check_permissions', function(src)
-    return IsPlayerAceAllowed(src, 'command')
+lib.callback.register('lbs_admin:server:checkAdminStatus', function(src)
+    local permissions, group = hasPermission(src)
+
+    if permissions then return true else return false end
 end)
 
 lib.callback.register('lbs_admin:server:getPlayerList', function()
@@ -177,113 +211,127 @@ lib.callback.register('lbs_admin:server:checkPlayerReports', function()
 end)
 
 lib.callback.register('lbs_admin:server:getReportList', function()
-    local response = MySQL.query.await('SELECT * FROM  `reports`')
 
-    local reports = {}
+    local permissions, group = hasPermission(src)
+    if permisisons['reports'] then
+        local response = MySQL.query.await('SELECT * FROM  `reports`')
 
-    if response then
-        for i = 1, #response do
-            local row = response[i]
-            table.insert(reports, {
-                id = row.reporter_id,
-                name = GetPlayerName(row.reporter_id),
-                reason = row.reason,
-                status = row.status
-            })
-        end
-    else
-        utils.debugPrint('[DEBUG] Failed to query reports table in database')
-    end
-
-
-    return reports
-end)
-
-lib.callback.register('lbs_admin:server:getBansList', function()
-    local bans = {}
-
-    if Config.BanProvider == 'qb' then
-        local response = MySQL.query.await('SELECT * FROM `bans`')
+        local reports = {}
 
         if response then
             for i = 1, #response do
                 local row = response[i]
+                table.insert(reports, {
+                    id = row.reporter_id,
+                    name = GetPlayerName(row.reporter_id),
+                    reason = row.reason,
+                    status = row.status
+                })
+            end
+        else
+            utils.debugPrint('[DEBUG] Failed to query reports table in database')
+        end
+    else
+        TriggerClientEvent('ox_lib:notify', src, {
+            title='LBS Admin',
+            description='You do not have access to reports',
+            type='error'
+        })
+    end
+
+    return reports 
+end)
+
+lib.callback.register('lbs_admin:server:getBansList', function()
+    local permissions, group = hasPermission(src)
+    if permissions['ban'] then 
+        local bans = {}
+
+        if Config.BanProvider == 'qb' then
+            local response = MySQL.query.await('SELECT * FROM `bans`')
+
+            if response then
+                for i = 1, #response do
+                    local row = response[i]
+                    table.insert(bans, {
+                        id = row.id,
+                        name=row.name,
+                        license=row.license,
+                        discord=row.discord,
+                        ip=row.ip,
+                        reason=row.reason,
+                        expire=row.expire,
+                        bannedby=row.bannedby
+                    })
+                end
+            end
+        elseif Config.BanProvider == 'ws' then
+            local resourceName = GetCurrentResourceName()
+            local filePath = GetResourcePath(resourceName) .. '/bans.json' 
+
+            local file = io.open(filePath, 'r')
+            if not file then
+                print('[ERROR] Failed to find bans.json')
+                return
+            end
+
+            local fileContent = file:read('*a')
+            file:close()
+
+            --debugText('Raw file content: ' .. fileContent)
+            
+            local response = json.decode(fileContent)
+            if not response then 
+                print('[ERROR] Failed to parse bans.json')
+                return
+            end
+
+            if response == nil then
+                print('[ERROR] Bans is nil')
+                return
+            elseif next(response) == nil then
+                print('[ERROR] Bans is an empty table')
+                return
+            end
+            
+
+            for key, ban in pairs(response) do
+                local license = nil
+                local discord = nil
+                local ip = nil
+            
+                if ban.identifiers then
+                    for identifier, _ in pairs(ban.identifiers) do
+                        if identifier:find("license:") then
+                            license = identifier
+                        elseif identifier:find("discord:") then
+                            discord = identifier
+                        elseif identifier:find("ip:") then
+                            ip = identifier
+                        end
+                    end
+                end
+
+                print(license)
+                print(discord)
+                print(ip)
+
                 table.insert(bans, {
-                    id = row.id,
-                    name=row.name,
-                    license=row.license,
-                    discord=row.discord,
-                    ip=row.ip,
-                    reason=row.reason,
-                    expire=row.expire,
-                    bannedby=row.bannedby
+                    id = key, 
+                    name = ban.name or "Unknown",
+                    license = license or "N/A",
+                    discord = discord or "N/A",
+                    ip = ip or "N/A",
+                    reason = ban.reason or "No reason provided",
+                    expire = ban.expires or 0,
+                    bannedby = "WaveShield"
                 })
             end
         end
-    elseif Config.BanProvider == 'ws' then
-        local resourceName = GetCurrentResourceName()
-        local filePath = GetResourcePath(resourceName) .. '/bans.json' 
-
-        local file = io.open(filePath, 'r')
-        if not file then
-            print('[ERROR] Failed to find bans.json')
-            return
-        end
-
-        local fileContent = file:read('*a')
-        file:close()
-
-        --debugText('Raw file content: ' .. fileContent)
-        
-        local response = json.decode(fileContent)
-        if not response then 
-            print('[ERROR] Failed to parse bans.json')
-            return
-        end
-
-        if response == nil then
-            print('[ERROR] Bans is nil')
-            return
-        elseif next(response) == nil then
-            print('[ERROR] Bans is an empty table')
-            return
-        end
-        
-
-        for key, ban in pairs(response) do
-            local license = nil
-            local discord = nil
-            local ip = nil
-        
-            if ban.identifiers then
-                for identifier, _ in pairs(ban.identifiers) do
-                    if identifier:find("license:") then
-                        license = identifier
-                    elseif identifier:find("discord:") then
-                        discord = identifier
-                    elseif identifier:find("ip:") then
-                        ip = identifier
-                    end
-                end
-            end
-
-            print(license)
-            print(discord)
-            print(ip)
-
-            table.insert(bans, {
-                id = key, 
-                name = ban.name or "Unknown",
-                license = license or "N/A",
-                discord = discord or "N/A",
-                ip = ip or "N/A",
-                reason = ban.reason or "No reason provided",
-                expire = ban.expires or 0,
-                bannedby = "WaveShield"
-            })
-        end
+        return bans
+    else 
+        return nil
     end
-    return bans
 end)
 ------------------------------
 --Events
@@ -292,14 +340,14 @@ end)
 ---@param target number: target player to get report for
 RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
     local src = source
+    local permissions, group = hasPermission(src)
     if not target then return end
     if action == 'close' then
-        if hasPermission(src, 'reports') then
+        if permissions['reports'] then
             local queries = {
                 {query = 'DELETE FROM `reports` WHERE reporter_id = ?', values= {target}}
             }
             MySQL.transaction.await(queries)
-            print('attempting to remove data')
 
             TriggerClientEvent('ox_lib:notify', src, {
                 title='Ticket Closed',
@@ -325,12 +373,13 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
     if not target then return end 
     local admin = GetPlayerName(source)
     local player = GetPlayerName(target)
+    local permissions, group = hasPermission(source)
     -- BAN ACTION
     if action == 'ban' then
         --log to discord
-        if hasPermission(source, 'ban') then
+        if permissions['ban'] then
             reason, banTime = getBanReason(reason, duration, durationUnit)
-            send_to_discord_log("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,source,player,target,reason), 255)
+            sendToDiscordLog("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,source,player,target,reason), 255)
             MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?,?,?,?,?,?,?)',{
                 GetPlayerName(target),
                 getIdentifier(target, 'license'),
@@ -343,21 +392,27 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
             DropPlayer(target, reason)
         end
     elseif action == 'teleport' then
-        if hasPermission(source, 'teleport') then 
+        if permissions['teleport'] then 
             local src = source 
             local coords = GetEntityCoords(GetPlayerPed(target))
-            send_to_discord_log("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
+            sendToDiscordLog("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
             TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
+        else
+            TriggerClientEvent('ox_lib:notify', source, {
+                title='LBS Admin',
+                description = 'You do not have permissions to teleport',
+                type='error'
+            })
         end
     elseif action == 'bring' then
-        if hasPermission(source, 'teleport') then 
+        if permissions['teleport'] then 
             local src = source
             local coords = GetEntityCoords(GetPlayerPed(src))
-            send_to_discord_log("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
+            sendToDiscordLog("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
             TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
         end
     elseif action == 'spectate' then
-        if hasPermission(source, 'spectate') then
+        if permissions['spectate'] then
             if source == target then 
                 TriggerClientEvent('ox_lib:notify', source , {
                     title = 'Error',
@@ -366,14 +421,14 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
                 })
                 return
             end
-            send_to_discord_log("Spectate Action", ("%s [%s] spectated %s [%s]"):format(admin,source,player,target), 16766720)
+            sendToDiscordLog("Spectate Action", ("%s [%s] spectated %s [%s]"):format(admin,source,player,target), 16766720)
             local targetPed = GetPlayerPed(target)
             local coords = GetEntityCoords(targetPed)
             TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
         end
     elseif action == 'kick' then
-        if hasPermission(source, 'kick') then
-            send_to_discord_log("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,source,player,target, reason), 16711680)
+        if permissions['kick'] then
+            sendToDiscordLog("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,source,player,target, reason), 16711680)
             local discordLink = Config.DiscordLink
             DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
         end
@@ -382,10 +437,11 @@ end)
 
 RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local src = source
-    if hasPermission(src, 'teleport') then
+    local permissions, group = hasPermission(src)
+    if permissions['teleport'] then
         if Config.Framework == 'qb' or Config.Framework == 'qbx' then
             TriggerClientEvent('QBCore:Command:GoToMarker', src)
-            send_to_discord_log("TPM Action", ("%s [%s] teleport to marker"):format(admin,source), 255)
+            sendToDiscordLog("TPM Action", ("%s [%s] teleport to marker"):format(admin,src), 255)
         end
     end
 end)
@@ -402,14 +458,15 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
         description = 'Report successfully submitted!',
         type='success'
     })
-    send_to_discord_log("Report Submitted", ("%s [%s] submitted a report with message: \n  %s"):format(GetPlayerName(source),source,message), 255)
+    sendToDiscordLog("Report Submitted", ("%s [%s] submitted a report with message: \n  %s"):format(GetPlayerName(src),src,message), 255)
 end)
 
 RegisterNetEvent('lbs_admin:server:unbanPlayer', function(banId)
-    if hasPermission(source, 'ban') then 
+    local permissions, group = hasPermission(source)
+    if permissions['ban'] and Config.BanProvider == 'ws' then 
         if not banId then return end
-        deleteBanRecord(banId)
+        deleteWSBanRecord(banId)
         local admin = GetPlayerName(source)
-        send_to_discord_log("Unban Action", ("%s [%s] unbanned ban ID: %s "):format(admin,source,banId), 255)
+        sendToDiscordLog("Unban Action", ("%s [%s] unbanned ban ID: %s "):format(admin,source,banId), 255)
     end
 end)

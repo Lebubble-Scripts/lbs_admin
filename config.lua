@@ -1,10 +1,30 @@
 Config = {}
 
 -- Set to True to enable debug mode
+-- ONLY TURN ON IF YOU HAVE ISSUES
 Config.EnableDebugMode = true
 
 -- Link to your discord for Ban/Kick Messages
 Config.DiscordLink = 'https://discord.gg/CUX8hVnswZ'
+
+Config.Groups = {
+    god = {
+        permissions = { "spectate" }, 
+        inherits = {'manager', 'admin', 'helper'} 
+    },
+    admin = {
+        permissions = { "ban" }, 
+        inherits = { "manager", "helper" } 
+    },
+    manager = {
+        permissions = { "kick", "warn" }, 
+        inherits = { "helper" } 
+    },
+    helper = {
+        permissions = { "teleport", "heal", "revive", 'reports' }, 
+        inherits = {} 
+    }
+}
 
 -- Set Framework Here  
 -- qb = qb-core 
