@@ -211,9 +211,9 @@ lib.callback.register('lbs_admin:server:checkPlayerReports', function()
 end)
 
 lib.callback.register('lbs_admin:server:getReportList', function()
-
+    local src = source
     local permissions, group = hasPermission(src)
-    if permisisons['reports'] then
+    if permissions['reports'] then
         local response = MySQL.query.await('SELECT * FROM  `reports`')
 
         local reports = {}
@@ -238,8 +238,9 @@ lib.callback.register('lbs_admin:server:getReportList', function()
             type='error'
         })
     end
-
-    return reports 
+    print('returning reports')
+    print(reports )
+    return reports or {}
 end)
 
 lib.callback.register('lbs_admin:server:getBansList', function()
@@ -333,6 +334,7 @@ lib.callback.register('lbs_admin:server:getBansList', function()
         return nil
     end
 end)
+
 ------------------------------
 --Events
 ------------------------------

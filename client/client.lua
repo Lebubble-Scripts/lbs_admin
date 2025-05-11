@@ -120,40 +120,50 @@ RegisterNUICallback('hideReportMenu', function(_, cb)
 end)
 
 RegisterNUICallback('spawnVehicle', function(data, cb)
-    local model = data.model
-    if not model then return end
+    TriggerServerEvent('lbs_admin:server:checkAdminStatus', function(isAdmin)
+      if isAdmin then 
+        local model = data.model
+        if not model then return end
 
-    if not IsModelInCdimage(model) or not IsModelAVehicle(model) then 
-      print('Invalid vehicle model', model)
-    end
+        if not IsModelInCdimage(model) or not IsModelAVehicle(model) then 
+          print('Invalid vehicle model', model)
+        end
 
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-      Wait(0)
-    end
+        RequestModel(model)
+        while not HasModelLoaded(model) do
+          Wait(0)
+        end
 
-    local playerPed = PlayerPedId()
-    local playerCoords = GetEntityCoords(playerPed)
+        local playerPed = PlayerPedId()
+        local playerCoords = GetEntityCoords(playerPed)
 
-    if IsPedInAnyVehicle(playerPed, true) then 
-      DeleteEntity(GetVehiclePedIsIn(playerPed, false))
-    end
-    
-    local vehicle = CreateVehicle(model, playerCoords.x, playerCoords.y, playerCoords.z, GetEntityHeading(playerPed), true, false)
+        if IsPedInAnyVehicle(playerPed, true) then 
+          DeleteEntity(GetVehiclePedIsIn(playerPed, false))
+        end
+        
+        local vehicle = CreateVehicle(model, playerCoords.x, playerCoords.y, playerCoords.z, GetEntityHeading(playerPed), true, false)
 
-    TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
+        TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
 
-    SetModelAsNoLongerNeeded(model)
+        SetModelAsNoLongerNeeded(model)
 
-    toggleNuiFrame(false)
-    
+        toggleNuiFrame(false)
+        
 
-    TriggerEvent('ox_lib:notify', {
-      title='Vehicle Spawned',
-      decsription='Vehicle has been spawned!',
-      type='success'
-    })
+        TriggerEvent('ox_lib:notify', {
+          title='Vehicle Spawned',
+          decsription='Vehicle has been spawned!',
+          type='success'
+        })
+      else
+        TriggerEvent('ox_lib:notify', {
+          title = 'LBS Admin',
+          description = 'You do not have permissions to spawn vehicles',
+          type='error'
+        })
 
+      end
+    end)
     cb({})
 end)
 

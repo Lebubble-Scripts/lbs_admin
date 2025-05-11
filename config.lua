@@ -41,6 +41,9 @@ Config.DiscordWebhook = "https://discord.com/api/webhooks/1360063633295675392/s4
 -- database tables. This will ensure you can view the bans on your server 
 -- with the choice of reversing the ban
 --------------------------------
+-- Note, this currently only affects how you view and delete bans. Working on running bans 
+-- through the system chosen.
+--------------------------------
 -- ws = WaveShield 
 -- qb = QBCore 
 -- qbx = Qbox

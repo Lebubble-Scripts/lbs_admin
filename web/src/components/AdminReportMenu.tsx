@@ -17,7 +17,7 @@ type Report = {
     status: 'open' | 'resolved' | 'rejected' | 'default';
 }
 
-type StatusKey = 'open' | 'resolved' | 'rejected' | 'default';
+//type StatusKey = 'open' | 'resolved' | 'rejected' | 'default';
 
 // const mockReports: Reports[] = [
 //     { id: 1, name: 'user1', reason: 'This is a test reason that goes well past fifty characters to ensure proper display.', status: 'open' },
@@ -35,12 +35,12 @@ type StatusKey = 'open' | 'resolved' | 'rejected' | 'default';
 
 
 export default function AdminReportMenu() {
-    const statusMessages = {
-    open: 'Report is open',
-    resolved: 'Report has been resolved',
-    rejected: 'Report has been rejected',
-    default: 'Unknown status',
-};
+//     const statusMessages = {
+//     open: 'Report is open',
+//     resolved: 'Report has been resolved',
+//     rejected: 'Report has been rejected',
+//     default: 'Unknown status',
+// };
     const [reports, setReports] = useState<Reports[]>([]);
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [modalOpened, setModalOpened] = useState(false);
@@ -59,7 +59,14 @@ export default function AdminReportMenu() {
     const fetchReports = () => {
         fetchNui<Reports[]>('getReportList')
         .then((data) => {
-            setReports(data);
+            if (!data) {
+                setReports([]);
+                console.log('failed to fetch reports')
+            }
+            else {
+                console.log('Fetched reports: ', data)
+                setReports(data || [])
+            }
         })
         .catch((e)=> {
             console.error('Error retrieving reports list ', e);
@@ -97,13 +104,13 @@ export default function AdminReportMenu() {
         fetchReports()
     }, []);
 
-    type ReportStatus = 'open' | 'closed' | 'default'
+    //type ReportStatus = 'open' | 'closed' | 'default'
 3
-    const statusColors: Record<ReportStatus, string> = {
-        open: 'green',
-        closed: 'red',
-        default: 'gray',
-    };
+    // const statusColors: Record<ReportStatus, string> = {
+    //     open: 'green',
+    //     closed: 'red',
+    //     default: 'gray',
+    // };
 
 
     return (
@@ -116,7 +123,7 @@ export default function AdminReportMenu() {
             }}
             >
                 {
-                    reports.map((report) => {
+                    (reports || []).map((report) => {
                         // Define background colors for statuses
                         const statusColors = {
                             open: 'yellow',
