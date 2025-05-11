@@ -2,13 +2,15 @@ local QBCore = nil;
 --ensures consistent order of roles. (needs work for dynamic role setup)
 local groupHierarchy = { 'god', 'admin', 'manager', 'helper'}
 local utils = require('shared/utils')
-
+local ESX = nil;
 
 if Config.Framework == 'qbx' then
     print('[LBS_ADMIN] Qbox detected')
 elseif Config.Framework == 'qb' then
     QBCore = exports['qb-core']:GetCoreObject();
     print('[LBS_ADMIN] QBCore detected')
+elseif Config.Framework == 'esx' then 
+    print('[LBS_ADMIN] ESX_Legacy detected')
 else   
     print('^1[LBS_ADMIN] No supported framework detected. Ensure qbox or qbcore is running.^7')
 end
@@ -74,8 +76,6 @@ local function hasPermission(playerId)
     for _, group in ipairs(groupHierarchy) do
         if IsPlayerAceAllowed(playerId, 'lbs_admin.' .. group) then
             playerGroup = group
-            print('found player group')
-            print(playerGroup)
             break
         end
     end
@@ -140,9 +140,7 @@ local function deleteWSBanRecord(identifier)
 
     if jsonTable[identifier] then
         jsonTable[identifier] = nil
-        if Config.EnableDebugMode then
-            print("[DEBUG] Removed entry for identifier: " .. identifier)
-        end
+        utils.debugPrint("Removed entry for identifier: " .. identifier)
     else
         print("[ERROR] Identifier '" .. identifier .. "' not found in bans.json.")
         return
@@ -192,7 +190,13 @@ lib.callback.register('lbs_admin:server:getPlayerList', function()
             })
         end
         utils.debugPrint('[DEBUG] Sending player list with ' .. #players .. ' players')
-
+    -- elseif Config.Framework = 'esx' then
+    --     for i, xPlayer in ipairs(ESX.GetExtendedPlayers())
+    --         table.insert(players, {
+    --             id = xPlayer.getIdentifier(),
+    --             name = xPlayer.getName()
+    --         })
+    --     end
     else 
         print('No Framework Found!')
     end
@@ -213,11 +217,9 @@ end)
 lib.callback.register('lbs_admin:server:getReportList', function()
     local src = source
     local permissions, group = hasPermission(src)
+    local reports = {}
     if permissions['reports'] then
         local response = MySQL.query.await('SELECT * FROM  `reports`')
-
-        local reports = {}
-
         if response then
             for i = 1, #response do
                 local row = response[i]
@@ -238,12 +240,11 @@ lib.callback.register('lbs_admin:server:getReportList', function()
             type='error'
         })
     end
-    print('returning reports')
-    print(reports )
     return reports or {}
 end)
 
 lib.callback.register('lbs_admin:server:getBansList', function()
+    local src = source
     local permissions, group = hasPermission(src)
     if permissions['ban'] then 
         local bans = {}

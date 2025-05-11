@@ -21,7 +21,7 @@ Config.Groups = {
         inherits = { "helper" } 
     },
     helper = {
-        permissions = { "teleport", "heal", "revive", 'reports' }, 
+        permissions = { "teleport", "heal", "revive", "reports" }, 
         inherits = {} 
     }
 }
