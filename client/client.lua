@@ -28,7 +28,7 @@ RegisterCommand('adminmenu', function()
       utils.debugPrint('Show NUI frame')
     else
       TriggerEvent('ox_lib:notify', {
-        title='Access Denied',
+        title='LBS Admin',
         description='you are not an admin',
         type='error'
       })
@@ -40,7 +40,7 @@ RegisterCommand('reportmenu', function()
   lib.callback('lbs_admin:server:checkPlayerReports', false, function(hasReport)
     if hasReport then
       TriggerEvent('ox_lib:notify', {
-        title='Reports',
+        title='LBS Admin',
         description = 'You already have an open report.',
         type='info'
       })
@@ -97,6 +97,105 @@ RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
   end)
 end)
 
+RegisterNetEvent('lbs_admin:client:goToMarker', function()
+      local PlayerPedId = PlayerPedId
+    local GetEntityCoords = GetEntityCoords
+    local GetGroundZFor_3dCoord = GetGroundZFor_3dCoord
+
+    local blipMarker <const> = GetFirstBlipInfoId(8)
+    if not DoesBlipExist(blipMarker) then
+        TriggerEvent('ox_lib:notify', {
+          title='LBS Admin',
+          description = 'No marker set',
+          type='error'
+        })
+        return 'marker'
+    end
+
+    -- Fade screen to hide how clients get teleported.
+    DoScreenFadeOut(650)
+    while not IsScreenFadedOut() do
+        Wait(0)
+    end
+
+    local ped, coords <const> = PlayerPedId(), GetBlipInfoIdCoord(blipMarker)
+    local vehicle = GetVehiclePedIsIn(ped, false)
+    local oldCoords <const> = GetEntityCoords(ped)
+
+    -- Unpack coords instead of having to unpack them while iterating.
+    -- 825.0 seems to be the max a player can reach while 0.0 being the lowest.
+    local x, y, groundZ, Z_START = coords['x'], coords['y'], 850.0, 950.0
+    local found = false
+    if vehicle > 0 then
+        FreezeEntityPosition(vehicle, true)
+    else
+        FreezeEntityPosition(ped, true)
+    end
+
+    for i = Z_START, 0, -25.0 do
+        local z = i
+        if (i % 2) ~= 0 then
+            z = Z_START - i
+        end
+
+        NewLoadSceneStart(x, y, z, x, y, z, 50.0, 0)
+        local curTime = GetGameTimer()
+        while IsNetworkLoadingScene() do
+            if GetGameTimer() - curTime > 1000 then
+                break
+            end
+            Wait(0)
+        end
+        NewLoadSceneStop()
+        SetPedCoordsKeepVehicle(ped, x, y, z)
+
+        while not HasCollisionLoadedAroundEntity(ped) do
+            RequestCollisionAtCoord(x, y, z)
+            if GetGameTimer() - curTime > 1000 then
+                break
+            end
+            Wait(0)
+        end
+
+        -- Get ground coord. As mentioned in the natives, this only works if the client is in render distance.
+        found, groundZ = GetGroundZFor_3dCoord(x, y, z, false);
+        if found then
+            Wait(0)
+            SetPedCoordsKeepVehicle(ped, x, y, groundZ)
+            break
+        end
+        Wait(0)
+    end
+
+    -- Remove black screen once the loop has ended.
+    DoScreenFadeIn(650)
+    if vehicle > 0 then
+        FreezeEntityPosition(vehicle, false)
+    else
+        FreezeEntityPosition(ped, false)
+    end
+
+    if not found then
+        -- If we can't find the coords, set the coords to the old ones.
+        -- We don't unpack them before since they aren't in a loop and only called once.
+        SetPedCoordsKeepVehicle(ped, oldCoords['x'], oldCoords['y'], oldCoords['z'] - 1.0)
+        TriggerEvent('ox_lib:notify', {
+          title='LBS Admin',
+          description = 'Erorr with teleport',
+          type='success'
+        })
+        --//QBCore.Functions.Notify(Lang:t('error.tp_error'), 'error', 5000)
+    end
+
+    -- If Z coord was found, set coords in found coords.
+    SetPedCoordsKeepVehicle(ped, x, y, groundZ)
+    TriggerEvent('ox_lib:notify', {
+      title='LBS Admin',
+      description = 'Successfully teleported',
+      type='success'
+    })
+end)
+
 --------------------
 --CALLBACKS
 --------------------
@@ -151,7 +250,7 @@ RegisterNUICallback('spawnVehicle', function(data, cb)
         
 
         TriggerEvent('ox_lib:notify', {
-          title='Vehicle Spawned',
+          title='LBS Admin',
           decsription='Vehicle has been spawned!',
           type='success'
         })
@@ -220,7 +319,7 @@ RegisterNUICallback('heal_self', function(_, cb)
   --log to discord here
 
   TriggerEvent('ox_lib:notify',{
-    title='Admin Action',
+    title='LBS Admin',
     description = 'You\'ve been healed',
     type='success'
   })
@@ -236,7 +335,7 @@ RegisterNuiCallback('revive_self', function(_, cb)
   end
   --log to discord here
   TriggerEvent('ox_lib:notify',{
-    title='Admin Action',
+    title='LBS Admin',
     description='You\'ve been revived',
     type='success'
   })
@@ -248,7 +347,7 @@ RegisterNUICallback('get_vec3', function(_,cb)
   local coords = GetEntityCoords(ped)
   cb({ x=coords.x, y=coords.y, z=coords.z })
   TriggerEvent('ox_lib:notify',{
-    title='Copied',
+    title='LBS Admin',
     desription='vec3 coords copied',
     type='success'
   })
@@ -260,7 +359,7 @@ RegisterNUICallback('get_vec4', function(_,cb)
   local heading = GetEntityHeading(ped)
   cb({ x=coords.x, y=coords.y, z=coords.z, w=heading })
   TriggerEvent('ox_lib:notify',{
-    title='Copied',
+    title='LBS Admin',
     desription='vec4 coords copied',
     type='success'
   })

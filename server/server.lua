@@ -353,13 +353,13 @@ RegisterNetEvent('lbs_admin:server:report_action', function(action, target)
             MySQL.transaction.await(queries)
 
             TriggerClientEvent('ox_lib:notify', src, {
-                title='Ticket Closed',
+                title='LBS Admin',
                 description='Successfully closed ticket',
                 type='success'
             })
 
             TriggerClientEvent('ox_lib:notify', target, {
-                title='Ticket Closed',
+                title='LBS Admin',
                 description="Your ticket was closed by " .. GetPlayerName(src),
                 type='success'
             })
@@ -374,15 +374,16 @@ end)
 ---@param durationUnit? string: for bans/kick - allows us to convert whatever choice of unit they chose into seconds for the DropPlayer() native. 
 RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reason, duration, durationUnit)
     if not target then return end 
-    local admin = GetPlayerName(source)
+    local src = source
+    local admin = GetPlayerName(src)
     local player = GetPlayerName(target)
-    local permissions, group = hasPermission(source)
+    local permissions, group = hasPermission(src)
     -- BAN ACTION
     if action == 'ban' then
         --log to discord
         if permissions['ban'] then
             reason, banTime = getBanReason(reason, duration, durationUnit)
-            sendToDiscordLog("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,source,player,target,reason), 255)
+            sendToDiscordLog("BAN Action", ("%s [%s] banned %s [%s] for: \n%s "):format(admin,src,player,target,reason), 255)
             MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?,?,?,?,?,?,?)',{
                 GetPlayerName(target),
                 getIdentifier(target, 'license'),
@@ -390,18 +391,17 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
                 getIdentifier(target, 'ip'),
                 reason,
                 banTime,
-                GetPlayerName(source)
+                GetPlayerName(src)
             })
             DropPlayer(target, reason)
         end
     elseif action == 'teleport' then
         if permissions['teleport'] then 
-            local src = source 
             local coords = GetEntityCoords(GetPlayerPed(target))
-            sendToDiscordLog("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,source,player,target), 255)
+            sendToDiscordLog("Teleport Action", ("%s [%s] teleported to %s [%s]"):format(admin,src,player,target), 255)
             TriggerClientEvent('lbs_admin:client:teleport_to_coords', src, coords)
         else
-            TriggerClientEvent('ox_lib:notify', source, {
+            TriggerClientEvent('ox_lib:notify', src, {
                 title='LBS Admin',
                 description = 'You do not have permissions to teleport',
                 type='error'
@@ -411,27 +411,27 @@ RegisterNetEvent('lbs_admin:server:player_action', function(action, target, reas
         if permissions['teleport'] then 
             local src = source
             local coords = GetEntityCoords(GetPlayerPed(src))
-            sendToDiscordLog("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,source,player,target), 32896)
+            sendToDiscordLog("Bring Action", ("%s [%s] teleported %s [%s]"):format(admin,src,player,target), 32896)
             TriggerClientEvent('lbs_admin:client:teleport_to_coords', target, coords)
         end
     elseif action == 'spectate' then
         if permissions['spectate'] then
-            if source == target then 
-                TriggerClientEvent('ox_lib:notify', source , {
+            if src == target then 
+                TriggerClientEvent('ox_lib:notify', src , {
                     title = 'Error',
                     description = 'You cannot spectate yourself',
                     type='error'
                 })
                 return
             end
-            sendToDiscordLog("Spectate Action", ("%s [%s] spectated %s [%s]"):format(admin,source,player,target), 16766720)
+            sendToDiscordLog("Spectate Action", ("%s [%s] spectated %s [%s]"):format(admin,src,player,target), 16766720)
             local targetPed = GetPlayerPed(target)
             local coords = GetEntityCoords(targetPed)
             TriggerClientEvent('lbs_admin:client:spectate', source, targetPed)
         end
     elseif action == 'kick' then
         if permissions['kick'] then
-            sendToDiscordLog("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,source,player,target, reason), 16711680)
+            sendToDiscordLog("Kick Action", ("%s [%s] kicked %s [%s] for: %s"):format(admin,src,player,target, reason), 16711680)
             local discordLink = Config.DiscordLink
             DropPlayer(target, "You were kicked for: \n" .. reason .. "\nJoin our Discord for more information: " .. discordLink)
         end
@@ -443,7 +443,7 @@ RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local permissions, group = hasPermission(src)
     if permissions['teleport'] then
         if Config.Framework == 'qb' or Config.Framework == 'qbx' then
-            TriggerClientEvent('QBCore:Command:GoToMarker', src)
+            TriggerClientEvent('lbs_admin:client:goToMarker', src)
             sendToDiscordLog("TPM Action", ("%s [%s] teleport to marker"):format(admin,src), 255)
         end
     end
@@ -457,7 +457,7 @@ RegisterNetEvent('lbs_admin:server:submitReport', function(message)
     })
 
     TriggerClientEvent('ox_lib:notify', src, {
-        title='Reports',
+        title='LBS Admin',
         description = 'Report successfully submitted!',
         type='success'
     })
