@@ -35,7 +35,7 @@ export default function PlayerManagement() {
           })
           .catch((e) => {
             console.error('Error retrieving player list', e);
-            setPlayers([]);
+            setPlayers(mockPlayers);
           });
     }, []);
 
@@ -91,6 +91,7 @@ export default function PlayerManagement() {
                     </div>
                 ))}
             </div>
+            
             {selectedPlayer && (
                 <PlayerActionModal
                     opened={modalOpened}

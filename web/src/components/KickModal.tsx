@@ -17,8 +17,8 @@ export default function KickModal({playerId, playerName, onConfirm, onCancel}: K
     }
 
     return (
-         <div className='sub-modal-overlay'>
-                    <div className='sub-modal-content'>
+         <div className='modal-overlay'>
+                    <div className='modal-content'>
                         <h2>Kick Player: {playerName}</h2>
                         <hr/>
                         <div className='form-group'>

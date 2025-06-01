@@ -12,32 +12,18 @@ export default function BanModal({playerId, playerName, onConfirm, onCancel}: Ba
     const [banReason, setBanReason] = useState("")
     const [durationValue, setDurationValue] = useState("1")
     const [durationUnit, setDurationUnit] = useState('s')
-    const [isClosing, setIsClosing] = useState(false)
 
     const handleConfirm = () => {
         onConfirm(playerId, banReason, durationValue, durationUnit)
     };
 
-    const handleCloseModal = () => {
-        setIsClosing(true);
-        console.log('closing ban modal')
-        setTimeout(() => {
-            onCancel();
-        }, 300);
-    }
 
     return (
-        <div className={`sub-modal-overlay ${isClosing ? 'modal-closing' : ''}`}>
-            <div className='sub-modal-content'>
+        <div className='modal-overlay'>
+            <div className='modal-content'>
                 <h2>Ban Player: {playerName}</h2>
                 <hr/>
                 <div className='form-group'>
-                    {/* <input
-                        type='text'
-                        value={banReason}
-                        onChange={(e) => setBanReason(e.target.value)}
-                        placeholder='Enter ban reason...'
-                    /> */}
                     <label>Ban Reason: </label>
                     {<Textarea 
                         placeholder='Enter ban reason...'
@@ -73,7 +59,7 @@ export default function BanModal({playerId, playerName, onConfirm, onCancel}: Ba
                 </div>
                 <div className='modal-actions'>
                     <button onClick={handleConfirm}><i className="fa-solid fa-gavel"></i> Submit Ban</button>
-                    <button onClick={handleCloseModal}><i className="fa-solid fa-xmark"></i> Cancel</button>
+                    <button onClick={onCancel}><i className="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             </div>
         </div>

@@ -264,10 +264,7 @@ button {
     transition: max-height 1s ease;
     max-height: 100px;
 
-    
-  .dropdown-closed {
-    animation: modalSlideOut 0.3s ease-out forwards;
-  }
+  
 
     .dropdown-header {
       padding: 10px;
@@ -291,7 +288,7 @@ button {
       list-style: none;
       padding: 0;
       overflow-y: auto;
-      animation: modalSlideIn 0.3s ease-out forwards;
+      //animation: modalSlideIn 0.3s ease-out forwards;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 
       .dropdown-item {
@@ -322,30 +319,6 @@ button {
 
 }
 
-
-
-
-@keyframes modalSlideIn {
-  from {
-    transform: translateY(-50px);
-    opacity: 0;
-  } 
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes modalSlideOut {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  } 
-  to {
-    transform: translateY(-50px);
-    opacity: 0;
-  }
-}
 // Modal styles
 .modal-overlay {
   position: fixed;
@@ -371,11 +344,8 @@ button {
   padding: 20px;
   color: $text_color;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-  animation: modalSlideIn 0.3s ease-out forwards;
+  //animation: modalSlideIn 0.3s ease-out forwards;
   font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
-  transition: max-height 0.3s ease, all 0.3s ease;
-  max-height: 700px; 
-
   &.expanded {
     max-height: 1200px; 
   }
@@ -394,21 +364,13 @@ button {
     padding: 10px;
   }
 
-  .sub-modal-overlay{
-    animation: modalSlideIn 0.3s ease-out forwards;
-  }
-
-  .sub-modal-overlay.modal-closing {
-    animation: modalSlideOut 0.3s ease-out forwards;
-  }
 
 
 
-
-  .sub-modal-content {
+  .modal-content {
     color: $text_color;
     font-family: 'ZxGamut-SemiBold', Arial, sans-serif;
-    animation: modalSlideFromTop .3s ease-out forwards;
+    //animation: modalSlideFromTop .3s ease-out forwards;
     transition: 0.3s;
 
     .form-group {
@@ -417,6 +379,8 @@ button {
       padding: 5px;
 
       textarea {
+        min-width: 50%;
+        min-height: 50%;
         background-color: $primary_color;
         color: $text_color;
         font-family: 'ZxGamut-SemiBold', Arial, sans-serif;

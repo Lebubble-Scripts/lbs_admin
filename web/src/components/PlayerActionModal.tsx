@@ -31,7 +31,6 @@ export default function PlayerActionModal({
     const [showBanModal, setShowBanModal] = useState(false)
     const [showKickModal, setShowKickModal] = useState(false)
     const [showWarnModal, setShowWarnModal] = useState(false)
-    const [isExpanded, setIsExpanded] = useState(false)
     const [hasPermissions, setHasPermissions] = useState(false)
 
 
@@ -61,7 +60,6 @@ export default function PlayerActionModal({
         })
 
         if (action === 'ban') {
-            setIsExpanded(true)
             setShowBanModal(true)
             setShowWarnModal(false)
             setShowKickModal(false)
@@ -97,7 +95,7 @@ export default function PlayerActionModal({
 
     return (
         <div className='modal-overlay'>
-            <div className={`modal-content ${isExpanded ? 'expanded' : 'collapsed'}`}>
+            <div className='modal-content'>
                 <div className="modal-header">
                 <h3>Actions for {player.name}</h3>
                 </div>
@@ -134,17 +132,20 @@ export default function PlayerActionModal({
                         <i className="fa-solid fa-eye"></i> Spectate
                     </button>
                 </div>
-                {
-                    showBanModal && hasPermissions && (
+                <button className="close-modal" onClick={onClose}>
+                    <i className="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            {
+                showBanModal && hasPermissions && (
                         <BanModal
                             playerId={player.id}
                             playerName={player.name}
                             onConfirm={handleBanConfirm}
                             onCancel={() => {
-                                setIsExpanded(false);
-                                setTimeout(()=> {
-                                    setShowBanModal(false)
-                                },300)
+                                setShowBanModal(false)
+                                
                             }}
                         />
                     )
@@ -169,12 +170,6 @@ export default function PlayerActionModal({
                         />
                     )
                 }
-                <button className="close-modal" onClick={onClose}>
-                    <i className="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            
         </div>
     )
 }

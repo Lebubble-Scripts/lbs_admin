@@ -25,6 +25,38 @@ type Ban = {
     bannedby: string
 }
 
+const mockBans: Bans[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    license: "license:1234567890abcdef",
+    discord: "JohnDoe#1234",
+    ip: "192.168.1.10",
+    reason: "Cheating",
+    expire: 1719878400, // Example timestamp
+    bannedby: "AdminOne"
+  },
+  {
+    id: "2",
+    name: "Jane Smith",
+    license: "license:abcdef1234567890",
+    discord: "JaneSmith#5678",
+    ip: "192.168.1.20",
+    reason: "Toxic behavior",
+    expire: 0, // Permanent ban
+    bannedby: "AdminTwo"
+  },
+  {
+    id: "3",
+    name: "PlayerThree",
+    license: "license:fedcba0987654321",
+    discord: "PlayerThree#9999",
+    ip: "10.0.0.5",
+    reason: "Exploiting bugs",
+    expire: 1722470400,
+    bannedby: "AdminThree"
+  }
+];
 
 export default function AdminReportMenu() {
     const [bans, setBans] = useState<Bans[]>([]);
@@ -46,15 +78,15 @@ export default function AdminReportMenu() {
         fetchNui<Bans[]>('getBansList')
         .then((data) => {
             if (!data){
-                setBans([])
+                setBans(data)
             }
             else {
-                setBans(data)
+                setBans(mockBans)
             }
         })
         .catch((e) => {
             console.error("Error retrieving bans list ", e)
-            setBans([])
+            setBans(mockBans)
         })
     }
 
