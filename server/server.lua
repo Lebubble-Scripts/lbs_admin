@@ -42,7 +42,7 @@ function send_to_discord_log(title, description, color)
     }
 
     PerformHttpRequest(webhook, function(err, text, headers)
-        print("[Discord Log] Response:", err, text)
+        utls.debugPrint("[Discord Log] Response:", err, text)
     end, "POST", json.encode({
         username = 'LBS Admin Logs',
         embeds = embed
@@ -63,16 +63,6 @@ local function hasAdminPermissions(src)
     --return IsPlayerAceAllowed(src, 'command')
 end
 
-RegisterCommand('checkAdminStatus', function(source, args)
-    local src = source
-    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
-        print('lbs_admin.group.admin')
-    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
-        print('lbs_admin.group.mod')
-    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
-        print('lbs_admin.group.helper')
-    end
-end, false)
 
 local function getPlayerGroup(src)
     if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
@@ -86,11 +76,8 @@ local function getPlayerGroup(src)
 end
 
 local function hasPermission(src, perm)
-    print('checking player group')
     local group = getPlayerGroup(src)
-    print('group: ' .. tostring(group))
     if not group then return false end 
-    print('checking permissions for group: ' .. group)
 
     for _, v in pairs(permissionsTable[group]) do 
         if v == perm then 
@@ -133,21 +120,20 @@ function getIdentifier(source, idtype)
 end
 
 local function deleteBanRecord(identifier)
-    print("Attempting to remove ban for identifier: " .. identifier)
 
     local resourceName = GetCurrentResourceName()
     local filePath = 'bans.json'
     local fileContent = LoadResourceFile(resourceName, filePath)
 
     if not fileContent or fileContent == "" then
-        print("[ERROR] bans.json is empty or could not be read.")
+        debugPrint("[ERROR] bans.json is empty or could not be read.")
         return
     end
 
 
     local success, jsonTable = pcall(function() return json.decode(fileContent) end)
     if not success or type(jsonTable) ~= "table" then
-        print("[ERROR] Failed to parse bans.json. Invalid JSON structure.")
+        debugPrint("[ERROR] Failed to parse bans.json. Invalid JSON structure.")
         return
     end
 
@@ -155,7 +141,7 @@ local function deleteBanRecord(identifier)
     if jsonTable[identifier] then
         jsonTable[identifier] = nil
         if Config.EnableDebugMode then
-            print("[DEBUG] Removed entry for identifier: " .. identifier)
+            print(" Removed entry for identifier: " .. identifier)
         end
     else
         print("[ERROR] Identifier '" .. identifier .. "' not found in bans.json.")
@@ -180,42 +166,34 @@ end
 ------------------------------
 --CALLBACKS
 ------------------------------
-lib.callback.register('lbs_admin:server:check_permissions', function(perm)
+lib.callback.register('lbs_admin:server:isAdmin', function(source)
     return hasAdminPermissions(source)
 end)
 
-lib.callback.register('lbs_admin:server:check_permission', function(action)
-    print("[DEBUG] Server Callback Data:", json.encode(action))
-    if type(action) ~= 'number' then 
-        print(action)
-    else 
-        print("[DEBUG] Data is a number, assuming it's an action ID")
-        return
-    end
-    --local action = data.action
-    return hasPermissions(source, action)
+lib.callback.register('lbs_admin:server:checkPermission', function(source, action)
+    return hasPermission(source, action)
 end)
 
 lib.callback.register('lbs_admin:server:getPlayerList', function()
     local players = {}
     if Config.Framework == 'qb' then 
         for _, player in pairs(QBCore.Functions.GetQBPlayers()) do
-            utils.debugPrint(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
+            utils.debugPrint(string.format(" Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
             table.insert(players, {
                 id = player.PlayerData.source,
                 name = player.PlayerData.name or 'Unknown'
             })
         end
-        utils.debugPrint('[DEBUG] Sending player list with ' .. #players .. ' players')
+        utils.debugPrint(' Sending player list with ' .. #players .. ' players')
     elseif Config.Framework == 'qbx' then
         for _, player in pairs(exports.qbx_core:GetQBPlayers()) do
-            utils.debugPrint(string.format("[DEBUG] Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
+            utils.debugPrint(string.format(" Player found: %s [%s]", player.PlayerData.name, player.PlayerData.source))
             table.insert(players, {
                 id = player.PlayerData.source, 
                 name = player.PlayerData.name or 'Unknown'
             })
         end
-        utils.debugPrint('[DEBUG] Sending player list with ' .. #players .. ' players')
+        utils.debugPrint(' Sending player list with ' .. #players .. ' players')
 
     else 
         print('No Framework Found!')
@@ -250,7 +228,7 @@ lib.callback.register('lbs_admin:server:getReportList', function()
             })
         end
     else
-        utils.debugPrint('[DEBUG] Failed to query reports table in database')
+        utils.debugPrint('Failed to query reports table in database')
     end
 
 
@@ -324,10 +302,6 @@ lib.callback.register('lbs_admin:server:getBansList', function()
                     end
                 end
             end
-
-            print(license)
-            print(discord)
-            print(ip)
 
             table.insert(bans, {
                 id = key, 
