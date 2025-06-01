@@ -9,6 +9,8 @@
 .DS_Store
 .env
 
+web/yarn.lock
+
 
 # Logs
 logs

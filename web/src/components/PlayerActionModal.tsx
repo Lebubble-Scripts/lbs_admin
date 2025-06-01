@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import BanModal from "./BanModal";
 import WarnModal from "./WarnModal";
 import KickModal from "./KickModal";
+import { fetchNui } from "../utils/fetchNui";
 
 
 interface Player {
     id: number;
     name: string;
+}
+
+interface permissions {
+    isAllowed: boolean
 }
 
 
@@ -27,13 +32,35 @@ export default function PlayerActionModal({
     const [showKickModal, setShowKickModal] = useState(false)
     const [showWarnModal, setShowWarnModal] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
+    const [hasPermissions, setHasPermissions] = useState(false)
 
+
+
+    const checkPermissions = (action: string) => {
+        return fetchNui<{isAllowed: boolean}>('hasPermissions', { action})
+        .then((data) => {
+            if (!data.isAllowed) {
+                setHasPermissions(false);
+                return false;
+            } else if (data.isAllowed) {
+                setHasPermissions(true);
+                return true;
+            }
+        })
+    }
     
         
     if (!opened) return null;
     
     const handleAction = (action: string) => {
-        if (action === 'ban'){
+        checkPermissions(action).then((allowed) => {
+            if (!allowed){
+                console.log('Permission denied for action:', action);
+                return;
+            }
+        })
+
+        if (action === 'ban') {
             setIsExpanded(true)
             setShowBanModal(true)
             setShowWarnModal(false)
@@ -108,7 +135,7 @@ export default function PlayerActionModal({
                     </button>
                 </div>
                 {
-                    showBanModal && (
+                    showBanModal && hasPermissions && (
                         <BanModal
                             playerId={player.id}
                             playerName={player.name}
@@ -123,7 +150,7 @@ export default function PlayerActionModal({
                     )
                 }
                 {
-                    showWarnModal && (
+                    showWarnModal && hasPermissions && (
                         <WarnModal
                             playerId={player.id}
                             playerName={player.name}
@@ -133,7 +160,7 @@ export default function PlayerActionModal({
                     )
                 }
                 {
-                    showKickModal && (
+                    showKickModal && hasPermissions && (
                         <KickModal
                             playerId={player.id}
                             playerName={player.name}

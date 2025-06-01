@@ -11,7 +11,11 @@ else
     print('^1[LBS_ADMIN] No supported framework detected. Ensure qbox or qbcore is running.^7')
 end
 
-
+local permissionsTable = {
+    ['lbs_admin.group.helper'] = {"teleport", "spectate", "reports", "warn"},
+    ['lbs_admin.group.mod'] = {'teleport', 'spectate',"reports", "warn",'kick'},
+    ['lbs_admin.group.admin'] = {'teleport', 'spectate', "reports","warn", 'kick', 'ban'}
+}
 
 
 ------------------------------
@@ -47,11 +51,53 @@ function send_to_discord_log(title, description, color)
 end
 
 local function hasAdminPermissions(src)
-    return IsPlayerAceAllowed(src, 'command')
+    isAdmin = false 
+    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
+        isAdmin = true
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
+        isAdmin = true
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
+        isAdmin = true
+    end
+    return isAdmin
+    --return IsPlayerAceAllowed(src, 'command')
+end
+
+RegisterCommand('checkAdminStatus', function(source, args)
+    local src = source
+    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
+        print('lbs_admin.group.admin')
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
+        print('lbs_admin.group.mod')
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
+        print('lbs_admin.group.helper')
+    end
+end, false)
+
+local function getPlayerGroup(src)
+    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
+        group = 'lbs_admin.group.admin'
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
+        group = 'lbs_admin.group.mod'
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
+        group = 'lbs_admin.group.helper'
+    end
+    return group
 end
 
 local function hasPermission(src, perm)
-    return IsPlayerAceAllowed(src, perm) or IsPlayerAceAllowed(src, 'command')
+    print('checking player group')
+    local group = getPlayerGroup(src)
+    print('group: ' .. tostring(group))
+    if not group then return false end 
+    print('checking permissions for group: ' .. group)
+
+    for _, v in pairs(permissionsTable[group]) do 
+        if v == perm then 
+            return true
+        end
+    end
+    return false 
 end
 
 local function getBanReason(reason, duration, durationUnit)
@@ -134,8 +180,20 @@ end
 ------------------------------
 --CALLBACKS
 ------------------------------
-lib.callback.register('lbs_admin:server:check_permissions', function(src)
-    return IsPlayerAceAllowed(src, 'command')
+lib.callback.register('lbs_admin:server:check_permissions', function(perm)
+    return hasAdminPermissions(source)
+end)
+
+lib.callback.register('lbs_admin:server:check_permission', function(action)
+    print("[DEBUG] Server Callback Data:", json.encode(action))
+    if type(action) ~= 'number' then 
+        print(action)
+    else 
+        print("[DEBUG] Data is a number, assuming it's an action ID")
+        return
+    end
+    --local action = data.action
+    return hasPermissions(source, action)
 end)
 
 lib.callback.register('lbs_admin:server:getPlayerList', function()

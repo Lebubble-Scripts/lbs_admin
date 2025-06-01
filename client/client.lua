@@ -25,7 +25,7 @@ RegisterCommand('adminmenu', function()
   lib.callback('lbs_admin:server:check_permissions', false, function(isAdmin)
     if isAdmin then
       toggleNuiFrame(true)
-      debugPrint('Show NUI frame')
+      utils.debugPrint('Show NUI frame')
     else
       TriggerEvent('ox_lib:notify', {
         title='Access Denied',
@@ -61,7 +61,7 @@ RegisterKeyMapping('adminmenu', 'Open Admin Menu', 'keyboard', 'F3')
 --------------------
 RegisterNetEvent('openmenu', function()
     toggleNuiFrame(true)
-    debugPrint('Show NUI Frame')
+    utils.debugPrint('Show NUI Frame')
 end)
 
 RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
@@ -108,15 +108,21 @@ end)
 
 RegisterNUICallback('hideAdminMenu', function(_, cb)
   toggleNuiFrame(false)
-  debugPrint('Hide NUI frame')
+  utils.debugPrint('Hide NUI frame')
   cb({})
 end)
 
 RegisterNUICallback('hideReportMenu', function(_, cb)
   toggleNuiReportsFrame(false)
-  debugPrint('Hide Report Menu')
+  utils.debugPrint('Hide Report Menu')
   cb({})
+end)
 
+RegisterNUICallback('hasPermissions', function(data, cb)
+  print("[DEBUG] NUI Callback Data:", json.encode(data))
+  lib.callback('lbs_admin:server:check_permission', false, function(perm)
+    cb({ isAllowed = perm })
+  end, {action = data.action})
 end)
 
 RegisterNUICallback('spawnVehicle', function(data, cb)
