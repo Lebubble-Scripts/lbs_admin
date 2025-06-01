@@ -27,8 +27,8 @@ function utils.debugPrint(...)
   for _, v in ipairs(args) do
     appendStr = appendStr .. ' ' .. tostring(v)
   end
-  local msgTemplate = '^3[%s]^0%s'
-  local finalMsg = msgTemplate:format('[DEBUG]', appendStr)
+  local msgTemplate = '^5[%s]^7%s'
+  local finalMsg = msgTemplate:format('DEBUG', appendStr)
   print(finalMsg)
 end
 
