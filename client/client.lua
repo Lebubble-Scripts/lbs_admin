@@ -22,7 +22,7 @@ end
 -- Commands
 --------------------
 RegisterCommand('adminmenu', function()
-  lib.callback('lbs_admin:server:check_permissions', false, function(isAdmin)
+  lib.callback('lbs_admin:server:isAdmin', false, function(isAdmin)
     if isAdmin then
       toggleNuiFrame(true)
       utils.debugPrint('Show NUI frame')
@@ -71,7 +71,7 @@ RegisterNetEvent('lbs_admin:client:teleport_to_coords', function(coords)
 end)
 
 RegisterNetEvent('lbs_admin:client:spectate', function(targetPed)
-  TriggerServerEvent('lbs_admin:server:check_permissions', function(isAdmin)
+  TriggerServerEvent('lbs_admin:server:isAdmin', function(isAdmin)
     if not isAdmin then return end
     local myPed = PlayerPedId()
     local targetPlayer = GetPlayerFromServerId(targetPed)
@@ -119,15 +119,23 @@ RegisterNUICallback('hideReportMenu', function(_, cb)
 end)
 
 RegisterNUICallback('hasPermissions', function(data, cb)
-  print("[DEBUG] NUI Callback Data:", json.encode(data))
-  lib.callback('lbs_admin:server:check_permission', false, function(perm)
-    cb({ isAllowed = perm })
-  end, {action = data.action})
+  local hasPerms = lib.callback.await('lbs_admin:server:checkPermission', false, data.action)
+  cb({isAllowed = hasPerms})
 end)
 
 RegisterNUICallback('spawnVehicle', function(data, cb)
     local model = data.model
     if not model then return end
+
+    local isAllowed = lib.callback.await('lbs_admin:server:isAdmin', false)
+    if not isAllowed then
+      TriggerEvent('ox_lib:notify', {
+        title='Access Denied',
+        description='You do not have permission to spawn vehicles.',
+        type='error'
+      })
+      return
+    end
 
     if not IsModelInCdimage(model) or not IsModelAVehicle(model) then 
       print('Invalid vehicle model', model)
