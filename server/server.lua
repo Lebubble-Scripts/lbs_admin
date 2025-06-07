@@ -14,7 +14,7 @@ end
 local permissionsTable = {
     ['lbs_admin.group.helper'] = {"teleport", "spectate", "reports", "warn"},
     ['lbs_admin.group.mod'] = {'teleport', 'spectate',"reports", "warn",'kick'},
-    ['lbs_admin.group.admin'] = {'teleport', 'spectate', "reports","warn", 'kick', 'ban'}
+    ['lbs_admin.group.administrator'] = {'teleport', 'spectate', "reports","warn", 'kick', 'ban'}
 }
 
 
@@ -52,7 +52,7 @@ end
 
 local function hasAdminPermissions(src)
     isAdmin = false 
-    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
+    if IsPlayerAceAllowed(src, 'lbs_admin.group.administrator') then
         isAdmin = true
     elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
         isAdmin = true
@@ -64,16 +64,23 @@ local function hasAdminPermissions(src)
 end
 
 
+
 local function getPlayerGroup(src)
-    if IsPlayerAceAllowed(src, 'lbs_admin.group.admin') then
-        group = 'lbs_admin.group.admin'
+    if IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
+        group = 'lbs_admin.group.helper' 
     elseif IsPlayerAceAllowed(src, 'lbs_admin.group.mod') then
         group = 'lbs_admin.group.mod'
-    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.helper') then
-        group = 'lbs_admin.group.helper'
+    elseif IsPlayerAceAllowed(src, 'lbs_admin.group.administrator') then
+        group = 'lbs_admin.group.administrator'
     end
     return group
 end
+
+RegisterCommand('checkAdminStatus', function(source, args, rawCommand)
+    local src = source
+    local group = getPlayerGroup(src)
+    print(group)
+end, false)
 
 local function hasPermission(src, perm)
     local group = getPlayerGroup(src)
@@ -238,83 +245,25 @@ end)
 lib.callback.register('lbs_admin:server:getBansList', function()
     local bans = {}
 
-    if Config.BanProvider == 'qb' then
-        local response = MySQL.query.await('SELECT * FROM `bans`')
 
-        if response then
-            for i = 1, #response do
-                local row = response[i]
-                table.insert(bans, {
-                    id = row.id,
-                    name=row.name,
-                    license=row.license,
-                    discord=row.discord,
-                    ip=row.ip,
-                    reason=row.reason,
-                    expire=row.expire,
-                    bannedby=row.bannedby
-                })
-            end
-        end
-    elseif Config.BanProvider == 'ws' then
-        local resourceName = GetCurrentResourceName()
-        local filePath = GetResourcePath(resourceName) .. '/bans.json' 
+    local response = MySQL.query.await('SELECT * FROM `bans`')
 
-        local file = io.open(filePath, 'r')
-        if not file then
-            print('[ERROR] Failed to find bans.json')
-            return
-        end
-
-        local fileContent = file:read('*a')
-        file:close()
-
-        --debugText('Raw file content: ' .. fileContent)
-        
-        local response = json.decode(fileContent)
-        if not response then 
-            print('[ERROR] Failed to parse bans.json')
-            return
-        end
-
-        if response == nil then
-            print('[ERROR] Bans is nil')
-            return
-        elseif next(response) == nil then
-            print('[ERROR] Bans is an empty table')
-            return
-        end
-        
-
-        for key, ban in pairs(response) do
-            local license = nil
-            local discord = nil
-            local ip = nil
-        
-            if ban.identifiers then
-                for identifier, _ in pairs(ban.identifiers) do
-                    if identifier:find("license:") then
-                        license = identifier
-                    elseif identifier:find("discord:") then
-                        discord = identifier
-                    elseif identifier:find("ip:") then
-                        ip = identifier
-                    end
-                end
-            end
-
+    if response then
+        for i = 1, #response do
+            local row = response[i]
             table.insert(bans, {
-                id = key, 
-                name = ban.name or "Unknown",
-                license = license or "N/A",
-                discord = discord or "N/A",
-                ip = ip or "N/A",
-                reason = ban.reason or "No reason provided",
-                expire = ban.expires or 0,
-                bannedby = "WaveShield"
+                id = row.id,
+                name=row.name,
+                license=row.license,
+                discord=row.discord,
+                ip=row.ip,
+                reason=row.reason,
+                expire=row.expire,
+                bannedby=row.bannedby
             })
         end
     end
+    
     return bans
 end)
 ------------------------------
@@ -415,7 +364,7 @@ end)
 RegisterNetEvent('lbs_admin:server:teleport_marker', function()
     local src = source
     if hasPermission(src, 'teleport') then
-        if Config.Framework == 'qb' or Config.Framework == 'qbx' then
+        if Config.Framework == 'qb' then
             TriggerClientEvent('QBCore:Command:GoToMarker', src)
             send_to_discord_log("TPM Action", ("%s [%s] teleport to marker"):format(admin,source), 255)
         end
