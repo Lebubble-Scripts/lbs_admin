@@ -120,6 +120,13 @@ end)
 
 RegisterNUICallback('hasPermissions', function(data, cb)
   local hasPerms = lib.callback.await('lbs_admin:server:checkPermission', false, data.action)
+  if not hasPerms then 
+    lib.notify({
+      title = 'Access Denied',
+      description = 'You do not have permission to perform this action.',
+      type = 'error'
+    })
+  end
   cb({isAllowed = hasPerms})
 end)
 
